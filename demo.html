@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNPトレカ交流会 - Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cnp-blue': '#1e40af',
+                        'cnp-orange': '#ea580c',
+                        'cnp-yellow': '#eab308',
+                        'cnp-purple': '#7c3aed',
+                    },
+                    fontFamily: {
+                        'noto-sans': ['Noto Sans JP', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .cnp-card {
+            @apply bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100;
+        }
+        .cnp-button {
+            @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 active:scale-95;
+        }
+        .cnp-button-primary {
+            @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 bg-blue-600 text-white hover:bg-blue-700;
+        }
+        .cnp-button-secondary {
+            @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 bg-orange-600 text-white hover:bg-orange-700;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">CNP</span>
+                    </div>
+                    <span class="font-bold text-xl text-gray-900">トレカ交流会</span>
+                </div>
+
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">ホーム</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">イベント一覧</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">マイページ</a>
+                </nav>
+
+                <div class="flex items-center space-x-4">
+                    <button class="cnp-button-primary text-sm">ログイン</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div id="main-content" class="container mx-auto px-4 py-8">
+        <!-- Home Page by default -->
+        <div id="home-page">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">CNPトレカ交流会</h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    全国のCNPトレーディングカード交流会情報をお届け。参加してスタンプを集めよう！
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <!-- Event Calendar -->
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">📅 イベントカレンダー</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors">←</button>
+                            <h3 class="text-lg font-semibold">2025年8月</h3>
+                            <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors">→</button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                            <div class="p-2 font-medium text-gray-500">日</div>
+                            <div class="p-2 font-medium text-gray-500">月</div>
+                            <div class="p-2 font-medium text-gray-500">火</div>
+                            <div class="p-2 font-medium text-gray-500">水</div>
+                            <div class="p-2 font-medium text-gray-500">木</div>
+                            <div class="p-2 font-medium text-gray-500">金</div>
+                            <div class="p-2 font-medium text-gray-500">土</div>
+                            <div class="p-2 text-gray-300">28</div>
+                            <div class="p-2 text-gray-300">29</div>
+                            <div class="p-2 text-gray-300">30</div>
+                            <div class="p-2 text-gray-300">31</div>
+                            <div class="p-2 text-gray-700">1</div>
+                            <div class="p-2 text-gray-700">2</div>
+                            <div class="p-2 text-gray-700">3</div>
+                            <div class="p-2 text-gray-700">4</div>
+                            <div class="p-2 text-gray-700">5</div>
+                            <div class="p-2 text-gray-700">6</div>
+                            <div class="p-2 text-gray-700">7</div>
+                            <div class="p-2 text-gray-700">8</div>
+                            <div class="p-2 text-gray-700">9</div>
+                            <div class="p-2 bg-blue-600 text-white font-medium rounded-lg relative">
+                                10
+                                <div class="absolute top-1 right-1 w-2 h-2 bg-orange-600 rounded-full"></div>
+                            </div>
+                            <div class="p-2 text-gray-700">11</div>
+                            <div class="p-2 text-gray-700">12</div>
+                            <div class="p-2 text-gray-700">13</div>
+                            <div class="p-2 text-gray-700">14</div>
+                            <div class="p-2 bg-blue-600 text-white font-medium rounded-lg relative">
+                                15
+                                <div class="absolute top-1 right-1 w-2 h-2 bg-orange-600 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event List -->
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">🗾 全国エリア別スケジュール</h2>
+                    <div class="space-y-4">
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <button class="px-3 py-1 rounded-full text-sm bg-blue-600 text-white">全て</button>
+                            <button class="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 hover:bg-gray-200">関東</button>
+                            <button class="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 hover:bg-gray-200">関西</button>
+                            <button class="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 hover:bg-gray-200">中部</button>
+                        </div>
+                        
+                        <div class="space-y-3 max-h-96 overflow-y-auto">
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <span class="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">関東</span>
+                                    <span class="text-sm text-gray-500">8/10 13:00</span>
+                                </div>
+                                <h3 class="font-medium text-gray-900 mb-1">第3回 CNPトレカ東京交流会</h3>
+                                <p class="text-sm text-gray-600 mb-2">📍 渋谷ヒカリエ ホールA</p>
+                                <button class="cnp-button-primary text-sm">詳細を見る</button>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <span class="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">関西</span>
+                                    <span class="text-sm text-gray-500">8/15 14:00</span>
+                                </div>
+                                <h3 class="font-medium text-gray-900 mb-1">CNPトレカ大阪交流会</h3>
+                                <p class="text-sm text-gray-600 mb-2">📍 大阪国際会議場</p>
+                                <button class="cnp-button-primary text-sm">詳細を見る</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-8 max-w-2xl mx-auto">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">🎯 スタンプを集めて交流しよう！</h3>
+                    <p class="text-gray-600 mb-6">
+                        各イベントに参加すると記念スタンプを獲得できます。マイページで参加履歴をチェックしましょう。
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="showPage('mypage')" class="cnp-button-primary text-center">マイページを見る</button>
+                        <button onclick="showPage('events')" class="cnp-button-secondary text-center">イベント一覧</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Detail Page -->
+        <div id="event-detail" class="hidden">
+            <div class="mb-6">
+                <button onclick="showPage('home')" class="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors">
+                    ← ホームに戻る
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-8">
+                        <div class="mb-6">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">関東</span>
+                                <span class="text-gray-500 text-sm">東京都</span>
+                            </div>
+                            <h1 class="text-3xl font-bold text-gray-900 mb-4">第3回 CNPトレカ東京交流会</h1>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div class="space-y-4">
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-500 mb-1">開催日時</h3>
+                                    <p class="text-lg text-gray-900">2025年8月10日 13:00開始</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-500 mb-1">会場</h3>
+                                    <p class="text-lg text-gray-900">渋谷ヒカリエ ホールA</p>
+                                    <p class="text-gray-600">東京都渋谷区渋谷2-21-1</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500 mb-1">参加者数</h3>
+                                <p class="text-3xl font-bold text-blue-600">
+                                    25<span class="text-lg text-gray-500 ml-1">人</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-3">イベント詳細</h3>
+                            <div class="prose prose-gray max-w-none">
+                                <p class="text-gray-700 leading-relaxed">
+                                    初心者歓迎！CNPトレーディングカードを持参してお越しください。<br>
+                                    カード交換やバトルを楽しみながら、CNPコミュニティの仲間と交流しましょう。<br><br>
+                                    
+                                    【持ち物】<br>
+                                    - CNPトレーディングカード<br>
+                                    - スリーブ・デッキケース等<br>
+                                    - 筆記用具<br><br>
+                                    
+                                    【注意事項】<br>
+                                    - 13:00受付開始、13:30開会予定<br>
+                                    - 参加費無料<br>
+                                    - 途中参加・途中退場可能
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">参加メンバー (25人)</h2>
+                        
+                        <div class="space-y-3 max-h-96 overflow-y-auto">
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">A</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">Alice</p>
+                                    <p class="text-xs text-gray-500">2025/08/10 参加</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">B</div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">Bob</p>
+                                    <p class="text-xs text-gray-500">2025/08/10 参加</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-6 mt-6 text-center">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">このイベントに参加予定ですか？</h3>
+                        <p class="text-gray-600 mb-4 text-sm">
+                            会場でQRコードをスキャンして<br>参加スタンプを獲得しましょう！
+                        </p>
+                        <div class="bg-yellow-400 bg-opacity-20 border border-yellow-400 rounded-lg p-3">
+                            <p class="text-sm text-gray-700">💡 スタンプは会場でのみ獲得できます</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Page -->
+        <div id="mypage" class="hidden">
+            <div class="mb-8">
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-8">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">U</div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">ユーザー名</h1>
+                            <p class="text-gray-600">@username</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center p-4 bg-blue-600 bg-opacity-10 rounded-lg">
+                            <div class="text-3xl font-bold text-blue-600">3</div>
+                            <div class="text-sm text-gray-600">参加イベント数</div>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-orange-600 bg-opacity-10 rounded-lg">
+                            <div class="text-3xl font-bold text-orange-600">2</div>
+                            <div class="text-sm text-gray-600">訪問エリア数</div>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-yellow-400 bg-opacity-10 rounded-lg">
+                            <div class="text-3xl font-bold text-yellow-600">⭐</div>
+                            <div class="text-sm text-gray-600">コレクター</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">🎯 参加スタンプ履歴</h2>
+                
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="bg-green-600 text-white px-2 py-1 rounded-full text-xs font-medium">✅ 参加済み</span>
+                                    <span class="text-sm text-gray-500">2025/08/10 参加</span>
+                                </div>
+                                
+                                <h3 class="text-lg font-semibold text-gray-900 mb-1">第3回 CNPトレカ東京交流会</h3>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <p>📅 2025年8月10日 13:00</p>
+                                    <p>📍 渋谷ヒカリエ ホールA</p>
+                                    <p>🗾 関東 - 東京都</p>
+                                </div>
+                            </div>
+                            
+                            <div class="ml-4">
+                                <button onclick="showPage('event-detail')" class="cnp-button-secondary text-sm">詳細を見る</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="bg-green-600 text-white px-2 py-1 rounded-full text-xs font-medium">✅ 参加済み</span>
+                                    <span class="text-sm text-gray-500">2025/07/20 参加</span>
+                                </div>
+                                
+                                <h3 class="text-lg font-semibold text-gray-900 mb-1">CNPトレカ大阪交流会</h3>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <p>📅 2025年7月20日 14:00</p>
+                                    <p>📍 大阪国際会議場</p>
+                                    <p>🗾 関西 - 大阪府</p>
+                                </div>
+                            </div>
+                            
+                            <div class="ml-4">
+                                <button class="cnp-button-secondary text-sm">詳細を見る</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stamp Page -->
+        <div id="stamp-page" class="hidden">
+            <div class="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center p-4 -m-8">
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 max-w-md w-full p-8 text-center">
+                    <div class="mb-6">
+                        <div class="text-6xl mb-4">🎯</div>
+                        <h1 class="text-2xl font-bold text-gray-900 mb-2">スタンプ獲得</h1>
+                        <p class="text-gray-600">イベント参加の記念スタンプを獲得しよう！</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">関東</span>
+                            <span class="text-sm text-gray-500">東京都</span>
+                        </div>
+                        <h2 class="font-bold text-gray-900 mb-2">第3回 CNPトレカ東京交流会</h2>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <p>📅 2025年8月10日 13:00</p>
+                            <p>📍 渋谷ヒカリエ ホールA</p>
+                        </div>
+                    </div>
+
+                    <button onclick="showStampSuccess()" class="cnp-button-primary w-full flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        <span>Xで認証してスタンプをGET！</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stamp Success -->
+        <div id="stamp-success" class="hidden">
+            <div class="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center p-4 -m-8">
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 max-w-md w-full p-8 text-center">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h2 class="text-xl font-bold text-green-600 mb-2">スタンプを獲得しました！</h2>
+                    <p class="text-gray-600 mb-6">
+                        イベント参加ありがとうございました！<br>マイページで確認できます。
+                    </p>
+                    <div class="space-y-3">
+                        <button onclick="showPage('mypage')" class="cnp-button-primary w-full">マイページを見る</button>
+                        <button onclick="showPage('home')" class="cnp-button-secondary w-full">ホームに戻る</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Login -->
+        <div id="admin-login" class="hidden">
+            <div class="min-h-screen flex items-center justify-center -m-8">
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 max-w-md w-full mx-4 p-8">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-white font-bold text-xl">🔐</span>
+                        </div>
+                        <h1 class="text-2xl font-bold text-gray-900 mb-2">管理者ページ</h1>
+                        <p class="text-gray-600">パスワードを入力してください</p>
+                    </div>
+
+                    <form class="space-y-4">
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">パスワード</label>
+                            <input
+                                type="password"
+                                id="password"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                                placeholder="管理者パスワードを入力"
+                                required
+                            />
+                        </div>
+
+                        <button onclick="showPage('admin-dashboard')" type="button" class="cnp-button-primary w-full">ログイン</button>
+                    </form>
+
+                    <div class="mt-6 text-center">
+                        <button onclick="showPage('home')" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">← ホームに戻る</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="admin-dashboard" class="hidden">
+            <div class="bg-white shadow-sm border-b border-gray-200 -mx-4 -mt-8 mb-8">
+                <div class="container mx-auto px-4">
+                    <div class="flex items-center justify-between h-16">
+                        <h1 class="text-xl font-bold text-gray-900">管理者ダッシュボード</h1>
+                        <button onclick="showPage('home')" class="text-sm text-gray-500 hover:text-gray-700 transition-colors">ログアウト</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">イベント管理</h2>
+                    <p class="text-gray-600">交流会イベントの作成・編集・削除を行えます</p>
+                </div>
+                <button onclick="showEventForm()" class="cnp-button-primary">新しいイベントを作成</button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6">
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">関東</span>
+                                <span class="text-sm text-gray-500">2025年8月10日 13:00</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">第3回 CNPトレカ東京交流会</h3>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <p>📍 渋谷ヒカリエ ホールA</p>
+                                <p>🗾 東京都</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2 ml-4">
+                            <button onclick="copyStampUrl()" class="cnp-button-secondary text-sm" title="スタンプ用URLをコピー">📱 URL</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 transition-colors">編集</button>
+                            <button class="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200 transition-colors">削除</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">関西</span>
+                                <span class="text-sm text-gray-500">2025年8月15日 14:00</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">CNPトレカ大阪交流会</h3>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <p>📍 大阪国際会議場</p>
+                                <p>🗾 大阪府</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2 ml-4">
+                            <button onclick="copyStampUrl()" class="cnp-button-secondary text-sm" title="スタンプ用URLをコピー">📱 URL</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 transition-colors">編集</button>
+                            <button class="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200 transition-colors">削除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = ['home-page', 'event-detail', 'mypage', 'stamp-page', 'stamp-success', 'admin-login', 'admin-dashboard'];
+            pages.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            // Update header navigation
+            updateNav(pageId);
+        }
+
+        function updateNav(pageId) {
+            const nav = document.querySelector('nav');
+            if (pageId === 'admin-login' || pageId === 'admin-dashboard') {
+                nav.style.display = 'none';
+            } else {
+                nav.style.display = 'flex';
+            }
+        }
+
+        function showStampSuccess() {
+            showPage('stamp-success');
+        }
+
+        function showEventForm() {
+            alert('イベント作成フォームを表示します（実装では新規作成画面が開きます）');
+        }
+
+        function copyStampUrl() {
+            const url = `${window.location.origin}/stamp?event_id=example-event-id`;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('スタンプ用URLをコピーしました！\n' + url);
+            }).catch(() => {
+                alert('URLのコピーに失敗しました');
+            });
+        }
+
+        // Navigation event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Header navigation
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach((link, index) => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pages = ['home', 'events', 'mypage'];
+                    if (pages[index] === 'events') {
+                        showPage('event-detail');
+                    } else {
+                        showPage(pages[index] === 'home' ? 'home-page' : pages[index]);
+                    }
+                });
+            });
+
+            // URL routing simulation
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                if (hash === 'admin') {
+                    showPage('admin-login');
+                } else if (hash === 'stamp') {
+                    showPage('stamp-page');
+                } else {
+                    showPage(hash);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
