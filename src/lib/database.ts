@@ -1,76 +1,116 @@
 import { Pool } from 'pg';
 import { Event, Participant, CreateEventData, CreateParticipantData } from '@/types/database';
 
-const pool = new Pool({
+const pool = process.env.DATABASE_URL ? new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   // Railway環境での接続設定
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-});
+}) : null;
 
 export const initDatabase = async () => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured, skipping initialization');
+    return;
+  }
+  
   try {
-    // Enable UUID extension
-    await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
-    
-    // Create Events table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS events (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        name TEXT NOT NULL,
-        event_date DATE NOT NULL,
-        start_time TIME NOT NULL,
-        area TEXT NOT NULL,
-        prefecture TEXT NOT NULL,
-        venue_name TEXT NOT NULL,
-        address TEXT NOT NULL,
-        description TEXT NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
-    
-    // Create Participants table
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS participants (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-        user_x_id TEXT NOT NULL,
-        user_x_name TEXT NOT NULL,
-        user_x_icon_url TEXT NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        UNIQUE(event_id, user_x_id)
-      )
-    `);
-    
-    console.log('Database initialized successfully');
+    const client = await pool.connect();
+    try {
+      // Enable UUID extension
+      await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+      
+      // Create Events table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS events (
+          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          name TEXT NOT NULL,
+          event_date DATE NOT NULL,
+          start_time TIME NOT NULL,
+          area TEXT NOT NULL,
+          prefecture TEXT NOT NULL,
+          venue_name TEXT NOT NULL,
+          address TEXT NOT NULL,
+          description TEXT NOT NULL,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      
+      // Create Participants table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS participants (
+          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+          user_x_id TEXT NOT NULL,
+          user_x_name TEXT NOT NULL,
+          user_x_icon_url TEXT NOT NULL,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          UNIQUE(event_id, user_x_id)
+        )
+      `);
+      
+      console.log('Database initialized successfully');
+    } finally {
+      client.release();
+    }
   } catch (error) {
     console.error('Database initialization error:', error);
     throw error;
-  } finally {
-    client.release();
   }
 };
 
 export const getEvents = async (): Promise<Event[]> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured, returning mock data');
+    return [
+      {
+        id: 'demo-1',
+        name: 'CNPトレカ交流会 東京',
+        event_date: '2025-01-15',
+        start_time: '14:00',
+        area: '関東',
+        prefecture: '東京都',
+        venue_name: 'サンプル会場',
+        address: '東京都渋谷区',
+        description: 'サンプルイベントです',
+        created_at: new Date().toISOString()
+      }
+    ];
+  }
+  
   try {
-    const result = await client.query('SELECT * FROM events ORDER BY event_date ASC, start_time ASC');
-    return result.rows;
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM events ORDER BY event_date ASC, start_time ASC');
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return [];
   }
 };
 
 export const getEventById = async (id: string): Promise<Event | null> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured');
+    return null;
+  }
+  
   try {
-    const result = await client.query('SELECT * FROM events WHERE id = $1', [id]);
-    return result.rows[0] || null;
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM events WHERE id = $1', [id]);
+      return result.rows[0] || null;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return null;
   }
 };
 
