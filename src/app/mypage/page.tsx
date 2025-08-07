@@ -149,7 +149,6 @@ export default async function MyPage() {
             )}
           </div>
         </div>
-      </div>
     </div>
   )
 }

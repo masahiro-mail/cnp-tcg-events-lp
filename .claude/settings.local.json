@@ -19,7 +19,12 @@
       "Bash(npm ci:*)",
       "Bash(npm run build:*)",
       "Bash(npx next:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(code:*)",
+      "Bash(start \"\" code \"H:\\マイドライブ\\20250731_ClaudeCode\\20250804_CNPTCGMtgLP\")",
+      "Bash(xcopy:*)",
+      "Bash(robocopy:*)",
+      "Bash(powershell:*)"
     ],
     "deny": []
   }

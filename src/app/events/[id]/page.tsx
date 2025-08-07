@@ -150,7 +150,6 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             </div>
           </div>
         </div>
-      </div>
     </div>
   )
 }

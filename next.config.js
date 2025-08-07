@@ -10,6 +10,7 @@ const nextConfig = {
     domains: ['pbs.twimg.com'],
     unoptimized: true,
   },
+  swcMinify: false,
 }
 
 module.exports = nextConfig

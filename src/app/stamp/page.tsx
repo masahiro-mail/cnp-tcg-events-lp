@@ -279,7 +279,6 @@ export default function StampPage() {
             )}
           </div>
         </div>
-      </div>
     </div>
   )
 }
