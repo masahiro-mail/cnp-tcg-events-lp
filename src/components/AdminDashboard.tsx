@@ -145,12 +145,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             <h2 className="text-2xl font-bold text-gray-900">イベント管理</h2>
             <p className="text-gray-600">交流会イベントの作成・編集・削除を行えます</p>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="cnp-button-primary"
-          >
-            新しいイベントを作成
-          </button>
+          <div className="flex space-x-3">
+            <a
+              href="/admin/events/create"
+              className="cnp-button-primary"
+            >
+              新しいイベントを作成
+            </a>
+            <button
+              onClick={() => setShowForm(true)}
+              className="cnp-button-secondary"
+            >
+              クイック作成
+            </button>
+          </div>
         </div>
 
         {events.length === 0 ? (
@@ -162,12 +170,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             <p className="text-gray-600 mb-6">
               最初のイベントを作成しましょう
             </p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="cnp-button-primary"
-            >
-              イベントを作成
-            </button>
+            <div className="flex space-x-3 justify-center">
+              <a
+                href="/admin/events/create"
+                className="cnp-button-primary"
+              >
+                イベントを作成
+              </a>
+              <button
+                onClick={() => setShowForm(true)}
+                className="cnp-button-secondary"
+              >
+                クイック作成
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
