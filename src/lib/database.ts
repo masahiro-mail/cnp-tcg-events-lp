@@ -255,8 +255,10 @@ export const deleteEvent = async (id: string): Promise<boolean> => {
 
 export const getParticipantsByEventId = async (eventId: string): Promise<Participant[]> => {
   if (!pool) {
-    console.warn('Database not configured');
-    return [];
+    console.warn('Database not configured, returning mock participants');
+    return mockParticipants.filter(p => p.event_id === eventId).sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
   }
 
   try {
@@ -269,14 +271,18 @@ export const getParticipantsByEventId = async (eventId: string): Promise<Partici
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    return [];
+    return mockParticipants.filter(p => p.event_id === eventId).sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
   }
 };
 
 export const getParticipantsByUserId = async (userId: string): Promise<Participant[]> => {
   if (!pool) {
-    console.warn('Database not configured');
-    return [];
+    console.warn('Database not configured, returning mock participants');
+    return mockParticipants.filter(p => p.user_x_id === userId).sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
   }
 
   try {
@@ -289,14 +295,36 @@ export const getParticipantsByUserId = async (userId: string): Promise<Participa
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    return [];
+    return mockParticipants.filter(p => p.user_x_id === userId).sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
   }
 };
 
 export const createParticipant = async (data: CreateParticipantData): Promise<Participant | null> => {
   if (!pool) {
-    console.warn('Database not configured');
-    return null;
+    console.warn('Database not configured, creating mock participant');
+    // 重複チェック
+    const existingParticipant = mockParticipants.find(
+      p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
+    );
+    if (existingParticipant) {
+      console.log('Participant already exists in mock data');
+      return null;
+    }
+    
+    const newParticipant: Participant = {
+      id: 'mock-participant-' + Date.now(),
+      event_id: data.event_id,
+      user_x_id: data.user_x_id,
+      user_x_name: data.user_x_name,
+      user_x_icon_url: data.user_x_icon_url,
+      created_at: new Date().toISOString()
+    };
+    
+    mockParticipants.push(newParticipant);
+    console.log('Mock participant added. Total participants:', mockParticipants.length);
+    return newParticipant;
   }
 
   try {
@@ -318,7 +346,26 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    return null;
+    // エラー時もモックデータで処理
+    const existingParticipant = mockParticipants.find(
+      p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
+    );
+    if (existingParticipant) {
+      return null;
+    }
+    
+    const newParticipant: Participant = {
+      id: 'mock-participant-error-' + Date.now(),
+      event_id: data.event_id,
+      user_x_id: data.user_x_id,
+      user_x_name: data.user_x_name,
+      user_x_icon_url: data.user_x_icon_url,
+      created_at: new Date().toISOString()
+    };
+    
+    mockParticipants.push(newParticipant);
+    console.log('Mock participant added after error. Total participants:', mockParticipants.length);
+    return newParticipant;
   }
 };
 

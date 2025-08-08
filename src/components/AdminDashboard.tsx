@@ -167,6 +167,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             >
               クイック作成
             </button>
+            <a
+              href="/admin/test-participants"
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+            >
+              テスト参加者追加
+            </a>
           </div>
         </div>
 
