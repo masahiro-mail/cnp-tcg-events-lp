@@ -10,6 +10,24 @@ const pool = process.env.DATABASE_URL ? new Pool({
   connectionTimeoutMillis: 2000,
 }) : null;
 
+// メモリ内モックデータストア
+let mockEvents: Event[] = [
+  {
+    id: 'demo-1',
+    name: 'CNPトレカ交流会 東京',
+    event_date: '2025-01-15',
+    start_time: '14:00',
+    area: '関東',
+    prefecture: '東京都',
+    venue_name: 'サンプル会場',
+    address: '東京都渋谷区',
+    description: 'サンプルイベントです',
+    created_at: new Date().toISOString()
+  }
+];
+
+let mockParticipants: Participant[] = [];
+
 export const initDatabase = async () => {
   if (!pool) {
     console.warn('Database not configured, skipping initialization');
@@ -64,20 +82,11 @@ export const initDatabase = async () => {
 export const getEvents = async (): Promise<Event[]> => {
   if (!pool) {
     console.warn('Database not configured, returning mock data');
-    return [
-      {
-        id: 'demo-1',
-        name: 'CNPトレカ交流会 東京',
-        event_date: '2025-01-15',
-        start_time: '14:00',
-        area: '関東',
-        prefecture: '東京都',
-        venue_name: 'サンプル会場',
-        address: '東京都渋谷区',
-        description: 'サンプルイベントです',
-        created_at: new Date().toISOString()
-      }
-    ];
+    return [...mockEvents].sort((a, b) => {
+      const dateA = new Date(`${a.event_date} ${a.start_time}`);
+      const dateB = new Date(`${b.event_date} ${b.start_time}`);
+      return dateA.getTime() - dateB.getTime();
+    });
   }
   
   try {
@@ -90,14 +99,18 @@ export const getEvents = async (): Promise<Event[]> => {
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    return [];
+    return [...mockEvents].sort((a, b) => {
+      const dateA = new Date(`${a.event_date} ${a.start_time}`);
+      const dateB = new Date(`${b.event_date} ${b.start_time}`);
+      return dateA.getTime() - dateB.getTime();
+    });
   }
 };
 
 export const getEventById = async (id: string): Promise<Event | null> => {
   if (!pool) {
-    console.warn('Database not configured');
-    return null;
+    console.warn('Database not configured, searching mock data');
+    return mockEvents.find(event => event.id === id) || null;
   }
   
   try {
@@ -110,14 +123,14 @@ export const getEventById = async (id: string): Promise<Event | null> => {
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    return null;
+    return mockEvents.find(event => event.id === id) || null;
   }
 };
 
 export const createEvent = async (data: CreateEventData): Promise<Event> => {
   if (!pool) {
     console.warn('Database not configured, creating mock event');
-    return {
+    const newEvent: Event = {
       id: 'mock-' + Date.now(),
       name: data.name,
       event_date: data.event_date,
@@ -129,6 +142,9 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       description: data.description,
       created_at: new Date().toISOString()
     };
+    mockEvents.push(newEvent);
+    console.log('Mock event added. Total mock events:', mockEvents.length);
+    return newEvent;
   }
 
   try {
@@ -146,7 +162,7 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
   } catch (error) {
     console.error('Database connection error:', error);
     // エラー時もモックデータを返して例外をスローしない
-    return {
+    const newEvent: Event = {
       id: 'mock-error-' + Date.now(),
       name: data.name,
       event_date: data.event_date,
@@ -158,12 +174,23 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       description: data.description,
       created_at: new Date().toISOString()
     };
+    mockEvents.push(newEvent);
+    console.log('Mock event added after error. Total mock events:', mockEvents.length);
+    return newEvent;
   }
 };
 
 export const updateEvent = async (id: string, data: CreateEventData): Promise<Event | null> => {
   if (!pool) {
-    console.warn('Database not configured');
+    console.warn('Database not configured, updating mock data');
+    const eventIndex = mockEvents.findIndex(event => event.id === id);
+    if (eventIndex !== -1) {
+      mockEvents[eventIndex] = {
+        ...mockEvents[eventIndex],
+        ...data
+      };
+      return mockEvents[eventIndex];
+    }
     return null;
   }
 
@@ -182,13 +209,27 @@ export const updateEvent = async (id: string, data: CreateEventData): Promise<Ev
     }
   } catch (error) {
     console.error('Database connection error:', error);
+    const eventIndex = mockEvents.findIndex(event => event.id === id);
+    if (eventIndex !== -1) {
+      mockEvents[eventIndex] = {
+        ...mockEvents[eventIndex],
+        ...data
+      };
+      return mockEvents[eventIndex];
+    }
     return null;
   }
 };
 
 export const deleteEvent = async (id: string): Promise<boolean> => {
   if (!pool) {
-    console.warn('Database not configured');
+    console.warn('Database not configured, deleting from mock data');
+    const eventIndex = mockEvents.findIndex(event => event.id === id);
+    if (eventIndex !== -1) {
+      mockEvents.splice(eventIndex, 1);
+      console.log('Mock event deleted. Remaining events:', mockEvents.length);
+      return true;
+    }
     return false;
   }
 
@@ -202,6 +243,12 @@ export const deleteEvent = async (id: string): Promise<boolean> => {
     }
   } catch (error) {
     console.error('Database connection error:', error);
+    const eventIndex = mockEvents.findIndex(event => event.id === id);
+    if (eventIndex !== -1) {
+      mockEvents.splice(eventIndex, 1);
+      console.log('Mock event deleted after error. Remaining events:', mockEvents.length);
+      return true;
+    }
     return false;
   }
 };
