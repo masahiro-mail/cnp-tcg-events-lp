@@ -33,7 +33,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }
 
   const handleCreateEvent = async (data: CreateEventData) => {
+    console.log('handleCreateEvent called with data:', data)
     try {
+      console.log('Making API request to /api/admin/events')
       const response = await fetch('/api/admin/events', {
         method: 'POST',
         headers: {
@@ -42,15 +44,22 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         body: JSON.stringify(data),
       })
 
+      console.log('Response status:', response.status)
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+
       if (response.ok) {
+        console.log('Response OK, fetching events')
         await fetchEvents()
         setShowForm(false)
         return { success: true }
       } else {
-        return { success: false, error: 'イベントの作成に失敗しました' }
+        const errorText = await response.text()
+        console.error('Response not OK. Status:', response.status, 'Error:', errorText)
+        return { success: false, error: `イベントの作成に失敗しました: ${errorText}` }
       }
     } catch (error) {
-      return { success: false, error: 'ネットワークエラーが発生しました' }
+      console.error('Network error:', error)
+      return { success: false, error: `ネットワークエラーが発生しました: ${error instanceof Error ? error.message : 'Unknown error'}` }
     }
   }
 
