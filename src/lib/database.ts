@@ -115,100 +115,191 @@ export const getEventById = async (id: string): Promise<Event | null> => {
 };
 
 export const createEvent = async (data: CreateEventData): Promise<Event> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured, creating mock event');
+    return {
+      id: 'mock-' + Date.now(),
+      name: data.name,
+      event_date: data.event_date,
+      start_time: data.start_time,
+      area: data.area,
+      prefecture: data.prefecture,
+      venue_name: data.venue_name,
+      address: data.address,
+      description: data.description,
+      created_at: new Date().toISOString()
+    };
+  }
+
   try {
-    const result = await client.query(`
-      INSERT INTO events (name, event_date, start_time, area, prefecture, venue_name, address, description)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *
-    `, [data.name, data.event_date, data.start_time, data.area, data.prefecture, data.venue_name, data.address, data.description]);
-    return result.rows[0];
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      const result = await client.query(`
+        INSERT INTO events (name, event_date, start_time, area, prefecture, venue_name, address, description)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *
+      `, [data.name, data.event_date, data.start_time, data.area, data.prefecture, data.venue_name, data.address, data.description]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    throw new Error('Database connection failed');
   }
 };
 
 export const updateEvent = async (id: string, data: CreateEventData): Promise<Event | null> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured');
+    return null;
+  }
+
   try {
-    const result = await client.query(`
-      UPDATE events 
-      SET name = $2, event_date = $3, start_time = $4, area = $5, prefecture = $6, venue_name = $7, address = $8, description = $9
-      WHERE id = $1
-      RETURNING *
-    `, [id, data.name, data.event_date, data.start_time, data.area, data.prefecture, data.venue_name, data.address, data.description]);
-    return result.rows[0] || null;
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      const result = await client.query(`
+        UPDATE events 
+        SET name = $2, event_date = $3, start_time = $4, area = $5, prefecture = $6, venue_name = $7, address = $8, description = $9
+        WHERE id = $1
+        RETURNING *
+      `, [id, data.name, data.event_date, data.start_time, data.area, data.prefecture, data.venue_name, data.address, data.description]);
+      return result.rows[0] || null;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return null;
   }
 };
 
 export const deleteEvent = async (id: string): Promise<boolean> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured');
+    return false;
+  }
+
   try {
-    const result = await client.query('DELETE FROM events WHERE id = $1', [id]);
-    return result.rowCount! > 0;
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      const result = await client.query('DELETE FROM events WHERE id = $1', [id]);
+      return result.rowCount! > 0;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return false;
   }
 };
 
 export const getParticipantsByEventId = async (eventId: string): Promise<Participant[]> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured');
+    return [];
+  }
+
   try {
-    const result = await client.query('SELECT * FROM participants WHERE event_id = $1 ORDER BY created_at ASC', [eventId]);
-    return result.rows;
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM participants WHERE event_id = $1 ORDER BY created_at ASC', [eventId]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return [];
   }
 };
 
 export const getParticipantsByUserId = async (userId: string): Promise<Participant[]> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured');
+    return [];
+  }
+
   try {
-    const result = await client.query('SELECT * FROM participants WHERE user_x_id = $1 ORDER BY created_at DESC', [userId]);
-    return result.rows;
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM participants WHERE user_x_id = $1 ORDER BY created_at DESC', [userId]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return [];
   }
 };
 
 export const createParticipant = async (data: CreateParticipantData): Promise<Participant | null> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured');
+    return null;
+  }
+
   try {
-    const result = await client.query(`
-      INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *
-    `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
-    return result.rows[0];
-  } catch (error: any) {
-    if (error.code === '23505') {
-      return null;
+    const client = await pool.connect();
+    try {
+      const result = await client.query(`
+        INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+      `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
+      return result.rows[0];
+    } catch (error: any) {
+      if (error.code === '23505') {
+        return null;
+      }
+      throw error;
+    } finally {
+      client.release();
     }
-    throw error;
-  } finally {
-    client.release();
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return null;
   }
 };
 
 export const getEventsByArea = async (area: string): Promise<Event[]> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured');
+    return [];
+  }
+
   try {
-    const result = await client.query('SELECT * FROM events WHERE area = $1 ORDER BY event_date ASC, start_time ASC', [area]);
-    return result.rows;
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM events WHERE area = $1 ORDER BY event_date ASC, start_time ASC', [area]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return [];
   }
 };
 
 export const getEventsByDate = async (date: string): Promise<Event[]> => {
-  const client = await pool.connect();
+  if (!pool) {
+    console.warn('Database not configured');
+    return [];
+  }
+
   try {
-    const result = await client.query('SELECT * FROM events WHERE event_date = $1 ORDER BY start_time ASC', [date]);
-    return result.rows;
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM events WHERE event_date = $1 ORDER BY start_time ASC', [date]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return [];
   }
 };
 
