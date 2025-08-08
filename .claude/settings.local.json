@@ -24,7 +24,10 @@
       "Bash(start \"\" code \"H:\\マイドライブ\\20250731_ClaudeCode\\20250804_CNPTCGMtgLP\")",
       "Bash(xcopy:*)",
       "Bash(robocopy:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npm start)",
+      "Bash(PORT=3000 npm start)",
+      "Bash(PORT=3001 npm start)"
     ],
     "deny": []
   }
