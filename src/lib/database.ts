@@ -17,10 +17,13 @@ let mockEvents: Event[] = [
     name: 'CNPトレカ交流会 東京',
     event_date: '2025-01-15',
     start_time: '14:00',
+    end_time: '17:00',
+    organizer: 'CNP運営事務局',
     area: '関東',
     prefecture: '東京都',
     venue_name: 'サンプル会場',
     address: '東京都渋谷区',
+    url: 'https://example.com',
     description: 'サンプルイベントです',
     created_at: new Date().toISOString()
   }
@@ -47,10 +50,13 @@ export const initDatabase = async () => {
           name TEXT NOT NULL,
           event_date DATE NOT NULL,
           start_time TIME NOT NULL,
+          end_time TIME,
+          organizer TEXT NOT NULL,
           area TEXT NOT NULL,
           prefecture TEXT NOT NULL,
           venue_name TEXT NOT NULL,
           address TEXT NOT NULL,
+          url TEXT,
           description TEXT NOT NULL,
           created_at TIMESTAMPTZ DEFAULT NOW()
         )
@@ -135,10 +141,13 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       name: data.name,
       event_date: data.event_date,
       start_time: data.start_time,
+      end_time: data.end_time,
+      organizer: data.organizer,
       area: data.area,
       prefecture: data.prefecture,
       venue_name: data.venue_name,
       address: data.address,
+      url: data.url,
       description: data.description,
       created_at: new Date().toISOString()
     };
@@ -151,10 +160,10 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
     const client = await pool.connect();
     try {
       const result = await client.query(`
-        INSERT INTO events (name, event_date, start_time, area, prefecture, venue_name, address, description)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO events (name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING *
-      `, [data.name, data.event_date, data.start_time, data.area, data.prefecture, data.venue_name, data.address, data.description]);
+      `, [data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description]);
       return result.rows[0];
     } finally {
       client.release();
@@ -167,10 +176,13 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       name: data.name,
       event_date: data.event_date,
       start_time: data.start_time,
+      end_time: data.end_time,
+      organizer: data.organizer,
       area: data.area,
       prefecture: data.prefecture,
       venue_name: data.venue_name,
       address: data.address,
+      url: data.url,
       description: data.description,
       created_at: new Date().toISOString()
     };
@@ -199,10 +211,10 @@ export const updateEvent = async (id: string, data: CreateEventData): Promise<Ev
     try {
       const result = await client.query(`
         UPDATE events 
-        SET name = $2, event_date = $3, start_time = $4, area = $5, prefecture = $6, venue_name = $7, address = $8, description = $9
+        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12
         WHERE id = $1
         RETURNING *
-      `, [id, data.name, data.event_date, data.start_time, data.area, data.prefecture, data.venue_name, data.address, data.description]);
+      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description]);
       return result.rows[0] || null;
     } finally {
       client.release();

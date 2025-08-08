@@ -20,26 +20,33 @@ const AREAS = [
   '九州・沖縄'
 ]
 
-const PREFECTURES = [
-  '北海道',
-  '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
-  '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
-  '新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県', '岐阜県', '静岡県', '愛知県',
-  '三重県', '滋賀県', '京都府', '大阪府', '兵庫県', '奈良県', '和歌山県',
-  '鳥取県', '島根県', '岡山県', '広島県', '山口県',
-  '徳島県', '香川県', '愛媛県', '高知県',
-  '福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県'
-]
+const PREFECTURES_BY_AREA: { [key: string]: string[] } = {
+  '北海道': ['北海道'],
+  '東北': ['青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県'],
+  '関東': ['茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県'],
+  '中部': ['新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県', '岐阜県', '静岡県', '愛知県'],
+  '近畿': ['三重県', '滋賀県', '京都府', '大阪府', '兵庫県', '奈良県', '和歌山県'],
+  '中国': ['鳥取県', '島根県', '岡山県', '広島県', '山口県'],
+  '四国': ['徳島県', '香川県', '愛媛県', '高知県'],
+  '九州・沖縄': ['福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県']
+}
+
+const getAllPrefectures = () => {
+  return Object.values(PREFECTURES_BY_AREA).flat()
+}
 
 export default function EventForm({ event, onSubmit, onCancel }: EventFormProps) {
   const [formData, setFormData] = useState<CreateEventData>({
     name: event?.name || '',
     event_date: event?.event_date || '',
     start_time: event?.start_time || '',
+    end_time: event?.end_time || '',
+    organizer: event?.organizer || '',
     area: event?.area || AREAS[0],
-    prefecture: event?.prefecture || PREFECTURES[0],
+    prefecture: event?.prefecture || (PREFECTURES_BY_AREA[AREAS[0]] || [])[0] || '',
     venue_name: event?.venue_name || '',
     address: event?.address || '',
+    url: event?.url || '',
     description: event?.description || '',
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -60,10 +67,22 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
+    const { name, value } = e.target
+    
+    if (name === 'area') {
+      // 地域が変更されたら対応する都道府県の最初の値を自動選択
+      const prefectures = PREFECTURES_BY_AREA[value] || []
+      setFormData({
+        ...formData,
+        area: value,
+        prefecture: prefectures[0] || ''
+      })
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      })
+    }
   }
 
   return (
@@ -88,6 +107,22 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
               placeholder="第3回 CNPトレカ東京交流会"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="organizer" className="block text-sm font-medium text-gray-700 mb-1">
+              企画者 *
+            </label>
+            <input
+              type="text"
+              id="organizer"
+              name="organizer"
+              value={formData.organizer}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              placeholder="CNP運営事務局"
               required
             />
           </div>
@@ -124,6 +159,21 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
             </div>
           </div>
 
+          <div>
+            <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
+              終了時刻
+            </label>
+            <input
+              type="time"
+              id="end_time"
+              name="end_time"
+              value={formData.end_time}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              placeholder="任意"
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-1">
@@ -157,7 +207,7 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
                 required
               >
-                {PREFECTURES.map((prefecture) => (
+                {(PREFECTURES_BY_AREA[formData.area] || []).map((prefecture) => (
                   <option key={prefecture} value={prefecture}>
                     {prefecture}
                   </option>
@@ -195,6 +245,21 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
               placeholder="東京都渋谷区渋谷2-21-1"
               required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
+              URL
+            </label>
+            <input
+              type="url"
+              id="url"
+              name="url"
+              value={formData.url}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              placeholder="https://example.com/event"
             />
           </div>
 

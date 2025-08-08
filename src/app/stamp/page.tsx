@@ -127,7 +127,36 @@ export default function StampPage() {
     <div className="min-h-screen bg-gradient-to-br from-cnp-blue to-cnp-purple">
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
           <div className="cnp-card max-w-md w-full p-8 text-center">
-            {stampStatus === 'idle' && (
+            {/* スタンプ機能一時停止メッセージ */}
+            <div className="mb-6">
+              <div className="text-6xl mb-4">🚧</div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                スタンプ機能は一時停止中です
+              </h1>
+              <p className="text-gray-600 mb-4">
+                現在、システムメンテナンスのため<br />
+                スタンプ機能を一時停止しております。
+              </p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left">
+                <h3 className="font-semibold text-yellow-800 mb-2">📋 イベント情報</h3>
+                <div className="text-sm text-yellow-700 space-y-1">
+                  <p><strong>{event.name}</strong></p>
+                  <p>📅 {formatDate(event.event_date)} {formatTime(event.start_time)}</p>
+                  <p>📍 {event.venue_name}</p>
+                  <p>🗾 {event.prefecture}</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={() => router.push('/')}
+                  className="cnp-button-primary w-full"
+                >
+                  ホームに戻る
+                </button>
+              </div>
+            </div>
+            
+            {false && stampStatus === 'idle' && (
               <>
                 <div className="mb-6">
                   <div className="text-6xl mb-4">🎯</div>

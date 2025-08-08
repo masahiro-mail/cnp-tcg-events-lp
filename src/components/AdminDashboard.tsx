@@ -218,8 +218,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       {event.name}
                     </h3>
                     <div className="text-sm text-gray-600 space-y-1">
+                      <p>👤 {event.organizer}</p>
                       <p>📍 {event.venue_name}</p>
                       <p>🗾 {event.prefecture}</p>
+                      {event.url && <p>🔗 <a href={event.url} target="_blank" rel="noopener noreferrer" className="text-cnp-blue hover:underline">{event.url}</a></p>}
+                      {event.end_time && <p>⏰ {formatTime(event.start_time)} - {formatTime(event.end_time)}</p>}
                     </div>
                   </div>
                   
