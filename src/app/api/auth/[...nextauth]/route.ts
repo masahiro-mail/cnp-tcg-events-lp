@@ -5,6 +5,8 @@ import { upsertUser } from '@/lib/database'
 // Twitter認証プロバイダーを設定（デモ用フォールバック付き）
 const providers = [
   TwitterProvider({
+    id: "twitter",
+    name: "Twitter",
     clientId: process.env.TWITTER_CLIENT_ID || 'demo-client-id',
     clientSecret: process.env.TWITTER_CLIENT_SECRET || 'demo-client-secret',
     version: "2.0",
