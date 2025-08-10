@@ -19,7 +19,7 @@ export default function AdminPage() {
     }
 
     // Diagram_Wolfユーザーのみ許可
-    const username = (session.user as any)?.username
+    const username = session.user?.username
     if (username === 'Diagram_Wolf') {
       setIsAuthorized(true)
     } else {

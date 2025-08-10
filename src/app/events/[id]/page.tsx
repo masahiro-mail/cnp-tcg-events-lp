@@ -96,16 +96,16 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                     </div>
                   )}
                   
-                  {(event as any).announcement_url && (
+                  {event?.announcement_url && (
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">告知URL</h3>
                       <a 
-                        href={(event as any).announcement_url} 
+                        href={event.announcement_url} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-lg text-cnp-blue hover:underline"
                       >
-                        {(event as any).announcement_url}
+                        {event.announcement_url}
                       </a>
                     </div>
                   )}

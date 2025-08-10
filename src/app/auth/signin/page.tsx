@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 export default function SignInPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [providers, setProviders] = useState<any>(null)
+  const [providers, setProviders] = useState<Record<string, any> | null>(null)
 
   useEffect(() => {
     getSession().then((session) => {

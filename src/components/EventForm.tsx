@@ -48,7 +48,7 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
     address: event?.address || '',
     url: event?.url || '',
     description: event?.description || '',
-    announcement_url: (event as any)?.announcement_url || '',
+    announcement_url: event?.announcement_url || '',
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')

@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { deleteEventMaster } from '@/lib/database'
 
+export const dynamic = 'force-dynamic'
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -11,7 +13,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
     
     // Diagram_Wolfユーザーのみアクセス許可
-    if (!session?.user || (session.user as any)?.username !== 'Diagram_Wolf') {
+    if (!session?.user || session.user?.username !== 'Diagram_Wolf') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

@@ -76,7 +76,7 @@ export const authOptions: NextAuthOptions = {
           session.user.id = token.sub!
           session.user.name = token.name
           session.user.image = token.picture as string
-          ;(session.user as any).username = token.username
+          session.user.username = token.username
         }
         return session
       } catch (error) {

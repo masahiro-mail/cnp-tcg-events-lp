@@ -3,12 +3,14 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getAllEventMasters } from '@/lib/database'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
     // Diagram_Wolfユーザーのみアクセス許可
-    if (!session?.user || (session.user as any)?.username !== 'Diagram_Wolf') {
+    if (!session?.user || session.user?.username !== 'Diagram_Wolf') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

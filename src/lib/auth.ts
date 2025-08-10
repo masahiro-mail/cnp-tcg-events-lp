@@ -24,7 +24,7 @@ export async function getCurrentUser(): Promise<User | null> {
       id: session.user.id!,
       name: session.user.name!,
       image: session.user.image!,
-      username: (session.user as any).username,
+      username: session.user.username || '',
     }
   } catch (error) {
     console.error('Error getting current user:', error)

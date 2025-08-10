@@ -1,16 +1,16 @@
 import { Pool } from 'pg';
-import { Event, Participant, CreateEventData, CreateParticipantData } from '@/types/database';
+import { Event, Participant, CreateEventData, CreateParticipantData, User, EventMaster, Participation, CreateUserData, DatabasePool } from '@/types/database';
 
 // ローカル開発用のモックデータベース
 const isLocalDev = process.env.DATABASE_URL?.startsWith('file:');
 
 // メモリ内データストア
 let mockData = {
-  users: [] as any[],
-  events: [] as any[],
-  participants: [] as any[],
-  event_masters: [] as any[],
-  participations: [] as any[]
+  users: [] as User[],
+  events: [] as Event[],
+  participants: [] as Participant[],
+  event_masters: [] as EventMaster[],
+  participations: [] as Participation[]
 };
 
 // テストデータの初期化
@@ -36,7 +36,7 @@ if (isLocalDev && typeof window === 'undefined') {
 
 const generateId = () => Date.now().toString() + Math.random().toString(36).substr(2, 9);
 
-let pool: any;
+let pool: DatabasePool | null = null;
 
 if (isLocalDev) {
   // ローカル開発用のモックデータベース
@@ -653,8 +653,9 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
         RETURNING *
       `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
       return result.rows[0];
-    } catch (error: any) {
-      if (error.code === '23505') {
+    } catch (error: unknown) {
+      const dbError = error as { code?: string };
+      if (dbError.code === '23505') {
         return null;
       }
       throw error;
@@ -752,7 +753,7 @@ export const joinEvent = async (eventId: string, userData: {
     `, [eventId, userData.user_x_id, userData.user_x_name, userData.user_x_icon_url]);
     
     return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error joining event:', error);
     return false;
   } finally {
@@ -781,7 +782,7 @@ export const leaveEvent = async (eventId: string, userId: string): Promise<boole
     );
     
     return result.rowCount! > 0;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error leaving event:', error);
     return false;
   } finally {
@@ -853,7 +854,7 @@ export const getEventsByDate = async (date: string): Promise<Event[]> => {
 };
 
 // 永続化されたユーザー一覧の取得
-export const getAllUsers = async (): Promise<any[]> => {
+export const getAllUsers = async (): Promise<User[]> => {
   const client = await pool.connect();
   try {
     const result = await client.query('SELECT * FROM users WHERE is_active = TRUE ORDER BY last_login_at DESC');
@@ -864,7 +865,7 @@ export const getAllUsers = async (): Promise<any[]> => {
 };
 
 // 永続化されたイベントマスター一覧の取得
-export const getAllEventMasters = async (): Promise<any[]> => {
+export const getAllEventMasters = async (): Promise<EventMaster[]> => {
   if (isLocalDev) {
     return mockData.event_masters.slice();
   }
@@ -898,7 +899,7 @@ export const deleteEventMaster = async (eventId: string): Promise<boolean> => {
 };
 
 // 参加履歴の取得
-export const getParticipationHistory = async (userXId?: string, eventMasterId?: string): Promise<any[]> => {
+export const getParticipationHistory = async (userXId?: string, eventMasterId?: string): Promise<Participation[]> => {
   const client = await pool.connect();
   try {
     let query = `

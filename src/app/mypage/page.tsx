@@ -5,6 +5,8 @@ import Header from '@/components/Header';
 import { getCurrentUser } from '@/lib/auth';
 import { getParticipantsByUserId, getEventById } from '@/lib/database';
 
+export const dynamic = 'force-dynamic';
+
 export default async function MyPage() {
   const user = await getCurrentUser();
   
