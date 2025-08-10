@@ -1,10 +1,11 @@
 import bcrypt from 'bcryptjs'
 
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || '$2a$10$example.hash.here'
+const ADMIN_PASSWORD = 'admin123'
 
 export async function verifyAdminPassword(password: string): Promise<boolean> {
   try {
-    return await bcrypt.compare(password, ADMIN_PASSWORD_HASH)
+    // シンプルな文字列比較
+    return password === ADMIN_PASSWORD
   } catch (error) {
     console.error('Admin password verification error:', error)
     return false

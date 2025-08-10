@@ -2,20 +2,22 @@ import NextAuth, { NextAuthOptions } from 'next-auth'
 import TwitterProvider from 'next-auth/providers/twitter'
 import { upsertUser } from '@/lib/database'
 
+const providers = [];
+
+// Twitter認証設定が有効な場合のみプロバイダーを追加
+if (process.env.TWITTER_CLIENT_ID && 
+    process.env.TWITTER_CLIENT_SECRET && 
+    !process.env.TWITTER_CLIENT_ID.includes('your-twitter-client-id') &&
+    !process.env.TWITTER_CLIENT_SECRET.includes('your-twitter-client-secret')) {
+  providers.push(TwitterProvider({
+    clientId: process.env.TWITTER_CLIENT_ID,
+    clientSecret: process.env.TWITTER_CLIENT_SECRET,
+    version: "2.0",
+  }));
+}
+
 export const authOptions: NextAuthOptions = {
-  providers: [
-    TwitterProvider({
-      clientId: process.env.TWITTER_CLIENT_ID || 'dummy-client-id',
-      clientSecret: process.env.TWITTER_CLIENT_SECRET || 'dummy-client-secret',
-      version: "2.0",
-      authorization: {
-        url: "https://twitter.com/i/oauth2/authorize",
-        params: {
-          scope: "users.read tweet.read",
-        },
-      },
-    })
-  ],
+  providers,
   debug: process.env.NODE_ENV === 'development',
   logger: {
     error: (code, metadata) => {

@@ -31,16 +31,22 @@ const AREA_PREFECTURES: { [key: string]: string[] } = {
   '九州・沖縄': ['福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県']
 }
 
+const getAllPrefectures = () => {
+  return Object.values(AREA_PREFECTURES).flat()
+}
+
 export default function EventForm({ event, onSubmit, onCancel }: EventFormProps) {
   const [formData, setFormData] = useState<CreateEventData>({
     name: event?.name || '',
     event_date: event?.event_date || '',
     start_time: event?.start_time || '',
-    end_time: (event as any)?.end_time || '',
+    end_time: event?.end_time || '',
+    organizer: event?.organizer || '',
     area: event?.area || AREAS[0],
     prefecture: event?.prefecture || AREA_PREFECTURES[AREAS[0]][0],
     venue_name: event?.venue_name || '',
     address: event?.address || '',
+    url: event?.url || '',
     description: event?.description || '',
     announcement_url: (event as any)?.announcement_url || '',
   })
@@ -106,6 +112,22 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
             />
           </div>
 
+          <div>
+            <label htmlFor="organizer" className="block text-sm font-medium text-gray-700 mb-1">
+              企画者 *
+            </label>
+            <input
+              type="text"
+              id="organizer"
+              name="organizer"
+              value={formData.organizer}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              placeholder="CNP運営事務局"
+              required
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="event_date" className="block text-sm font-medium text-gray-700 mb-1">
@@ -136,6 +158,21 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
                 required
               />
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
+              終了時刻
+            </label>
+            <input
+              type="time"
+              id="end_time"
+              name="end_time"
+              value={formData.end_time}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              placeholder="任意"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -240,6 +277,21 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
               placeholder="東京都渋谷区渋谷2-21-1"
               required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
+              URL
+            </label>
+            <input
+              type="url"
+              id="url"
+              name="url"
+              value={formData.url}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              placeholder="https://example.com/event"
             />
           </div>
 

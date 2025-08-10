@@ -4,10 +4,12 @@ export interface Event {
   event_date: string;
   start_time: string;
   end_time?: string;
+  organizer: string;
   area: string;
   prefecture: string;
   venue_name: string;
   address: string;
+  url?: string;
   description: string;
   announcement_url?: string;
   created_at: string;
@@ -27,10 +29,12 @@ export interface CreateEventData {
   event_date: string;
   start_time: string;
   end_time?: string;
+  organizer: string;
   area: string;
   prefecture: string;
   venue_name: string;
   address: string;
+  url?: string;
   description: string;
   announcement_url?: string;
 }

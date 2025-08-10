@@ -61,18 +61,63 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                 </h1>
               </div>
 
-              <div className="space-y-4 mb-8">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">開催日時</h3>
-                  <p className="text-lg text-gray-900">
-                    {formatDate(event.event_date)} {formatTime(event.start_time)}開始
-                  </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">企画者</h3>
+                    <p className="text-lg text-gray-900">{event.organizer}</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">開催日時</h3>
+                    <p className="text-lg text-gray-900">
+                      {formatDate(event.event_date)} {formatTime(event.start_time)}
+                      {event.end_time && ` - ${formatTime(event.end_time)}`}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">会場</h3>
+                    <p className="text-lg text-gray-900">{event.venue_name}</p>
+                    <p className="text-gray-600">{event.address}</p>
+                  </div>
+                  
+                  {event.url && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">関連リンク</h3>
+                      <a 
+                        href={event.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-lg text-cnp-blue hover:underline"
+                      >
+                        {event.url}
+                      </a>
+                    </div>
+                  )}
+                  
+                  {(event as any).announcement_url && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500 mb-1">告知URL</h3>
+                      <a 
+                        href={(event as any).announcement_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-lg text-cnp-blue hover:underline"
+                      >
+                        {(event as any).announcement_url}
+                      </a>
+                    </div>
+                  )}
                 </div>
-                
+
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">会場</h3>
-                  <p className="text-lg text-gray-900">{event.venue_name}</p>
-                  <p className="text-gray-600">{event.address}</p>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">参加者数</h3>
+                  <p className="text-3xl font-bold text-cnp-blue">
+                    {participants.length + 1}
+                    <span className="text-lg text-gray-500 ml-1">人</span>
+                  </p>
+                  <p className="text-xs text-gray-500">（主催者 + 参加者）</p>
                 </div>
               </div>
 

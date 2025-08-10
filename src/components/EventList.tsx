@@ -83,9 +83,12 @@ export default function EventList({ events }: EventListProps) {
                   <h3 className="font-medium text-gray-900 mb-1">
                     {event.name}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    📍 {event.venue_name}
-                  </p>
+                  <div className="text-sm text-gray-600 mb-2 space-y-1">
+                    <p>👤 {event.organizer}</p>
+                    <p>📍 {event.venue_name}</p>
+                    {event.url && <p>🔗 <a href={event.url} target="_blank" rel="noopener noreferrer" className="text-cnp-blue hover:underline">{event.url}</a></p>}
+                    {event.end_time && <p>⏰ {formatTime(event.start_time)} - {formatTime(event.end_time)}</p>}
+                  </div>
                   <p className="text-sm text-gray-500 line-clamp-2">
                     {event.description}
                   </p>

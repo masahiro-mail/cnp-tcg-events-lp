@@ -33,7 +33,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }
 
   const handleCreateEvent = async (data: CreateEventData) => {
+    console.log('handleCreateEvent called with data:', data)
     try {
+      console.log('Making API request to /api/admin/events')
       const response = await fetch('/api/admin/events', {
         method: 'POST',
         headers: {
@@ -42,15 +44,22 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         body: JSON.stringify(data),
       })
 
+      console.log('Response status:', response.status)
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+
       if (response.ok) {
+        console.log('Response OK, fetching events')
         await fetchEvents()
         setShowForm(false)
         return { success: true }
       } else {
-        return { success: false, error: 'イベントの作成に失敗しました' }
+        const errorText = await response.text()
+        console.error('Response not OK. Status:', response.status, 'Error:', errorText)
+        return { success: false, error: `イベントの作成に失敗しました: ${errorText}` }
       }
     } catch (error) {
-      return { success: false, error: 'ネットワークエラーが発生しました' }
+      console.error('Network error:', error)
+      return { success: false, error: `ネットワークエラーが発生しました: ${error instanceof Error ? error.message : 'Unknown error'}` }
     }
   }
 
@@ -187,6 +196,26 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             <h2 className="text-2xl font-bold text-gray-900">現在のイベント一覧</h2>
             <p className="text-gray-600">表示中のイベント（編集・削除可能）</p>
           </div>
+          <div className="flex space-x-3">
+            <a
+              href="/admin/events/create"
+              className="cnp-button-primary"
+            >
+              新しいイベントを作成
+            </a>
+            <button
+              onClick={() => setShowForm(true)}
+              className="cnp-button-secondary"
+            >
+              クイック作成
+            </button>
+            <a
+              href="/admin/test-participants"
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+            >
+              テスト参加者追加
+            </a>
+          </div>
         </div>
 
         {events.length === 0 ? (
@@ -198,12 +227,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             <p className="text-gray-600 mb-6">
               最初のイベントを作成しましょう
             </p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="cnp-button-primary"
-            >
-              イベントを作成
-            </button>
+            <div className="flex space-x-3 justify-center">
+              <a
+                href="/admin/events/create"
+                className="cnp-button-primary"
+              >
+                イベントを作成
+              </a>
+              <button
+                onClick={() => setShowForm(true)}
+                className="cnp-button-secondary"
+              >
+                クイック作成
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
@@ -223,8 +260,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       {event.name}
                     </h3>
                     <div className="text-sm text-gray-600 space-y-1">
+                      <p>👤 {event.organizer}</p>
                       <p>📍 {event.venue_name}</p>
                       <p>🗾 {event.prefecture}</p>
+                      {event.url && <p>🔗 <a href={event.url} target="_blank" rel="noopener noreferrer" className="text-cnp-blue hover:underline">{event.url}</a></p>}
+                      {event.end_time && <p>⏰ {formatTime(event.start_time)} - {formatTime(event.end_time)}</p>}
                     </div>
                   </div>
                   

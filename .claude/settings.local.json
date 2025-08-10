@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(npx create-next-app:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(rm:*)",
+      "Bash(code --version)",
+      "Bash(code tunnel:*)",
+      "Bash(taskkill:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx next:*)",
+      "Bash(npm run dev:*)",
+      "Bash(code:*)",
+      "Bash(start \"\" code \"H:\\マイドライブ\\20250731_ClaudeCode\\20250804_CNPTCGMtgLP\")",
+      "Bash(xcopy:*)",
+      "Bash(robocopy:*)",
+      "Bash(powershell:*)",
+      "Bash(npm start)",
+      "Bash(PORT=3000 npm start)",
+      "Bash(PORT=3001 npm start)",
+      "Bash(git checkout:*)"
+    ],
+    "deny": []
+  }
+}
