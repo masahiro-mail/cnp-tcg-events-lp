@@ -535,6 +535,32 @@ export const upsertUser = async (userData: {
   x_username: string;
   x_icon_url: string;
 }): Promise<void> => {
+  if (!pool) {
+    console.warn('Database not configured, storing user in mock data');
+    // モックデータ用の実装
+    const existing = mockData.users.find(u => u.x_id === userData.x_id);
+    if (existing) {
+      existing.x_name = userData.x_name;
+      existing.x_username = userData.x_username;
+      existing.x_icon_url = userData.x_icon_url;
+      existing.last_login_at = new Date().toISOString();
+      existing.updated_at = new Date().toISOString();
+    } else {
+      mockData.users.push({
+        x_id: userData.x_id,
+        x_name: userData.x_name,
+        x_username: userData.x_username,
+        x_icon_url: userData.x_icon_url,
+        first_login_at: new Date().toISOString(),
+        last_login_at: new Date().toISOString(),
+        is_active: true,
+        updated_at: new Date().toISOString()
+      });
+    }
+    console.log('User upserted in mock data:', userData.x_id);
+    return;
+  }
+
   const client = await pool.connect();
   try {
     await client.query(`
@@ -666,6 +692,39 @@ export const joinEvent = async (eventId: string, userData: {
   user_x_name: string;
   user_x_icon_url: string;
 }): Promise<boolean> => {
+  if (!pool) {
+    console.warn('Database not configured, using mock data for joinEvent');
+    // ユーザー情報を永続化
+    await upsertUser({
+      x_id: userData.user_x_id,
+      x_name: userData.user_x_name,
+      x_username: userData.user_x_name,
+      x_icon_url: userData.user_x_icon_url
+    });
+    
+    // 既存参加チェック
+    const existingParticipant = mockData.participants.find(
+      p => p.event_id === eventId && p.user_x_id === userData.user_x_id
+    );
+    
+    if (existingParticipant) {
+      return false; // 既に参加済み
+    }
+    
+    // 参加者を追加
+    const participant = {
+      id: generateId(),
+      event_id: eventId,
+      user_x_id: userData.user_x_id,
+      user_x_name: userData.user_x_name,
+      user_x_icon_url: userData.user_x_icon_url,
+      created_at: new Date().toISOString()
+    };
+    mockData.participants.push(participant);
+    console.log('Mock participant added:', participant.id);
+    return true;
+  }
+
   const client = await pool.connect();
   try {
     // ユーザー情報を永続化
@@ -703,6 +762,17 @@ export const joinEvent = async (eventId: string, userData: {
 
 // イベント参加キャンセル機能
 export const leaveEvent = async (eventId: string, userId: string): Promise<boolean> => {
+  if (!pool) {
+    console.warn('Database not configured, using mock data for leaveEvent');
+    const initialLength = mockData.participants.length;
+    mockData.participants = mockData.participants.filter(
+      p => !(p.event_id === eventId && p.user_x_id === userId)
+    );
+    const success = mockData.participants.length < initialLength;
+    console.log('Mock participant removed:', success);
+    return success;
+  }
+
   const client = await pool.connect();
   try {
     const result = await client.query(
@@ -721,6 +791,14 @@ export const leaveEvent = async (eventId: string, userId: string): Promise<boole
 
 // ユーザーの参加状態確認
 export const isUserJoined = async (eventId: string, userId: string): Promise<boolean> => {
+  if (!pool) {
+    console.warn('Database not configured, checking mock data for isUserJoined');
+    const participant = mockData.participants.find(
+      p => p.event_id === eventId && p.user_x_id === userId
+    );
+    return !!participant;
+  }
+
   const client = await pool.connect();
   try {
     const result = await client.query(
