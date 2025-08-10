@@ -202,6 +202,7 @@ export const initDatabase = async () => {
     return;
   }
   
+  try {
     const client = await pool.connect();
     try {
       // Enable UUID extension

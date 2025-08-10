@@ -1,37 +1,37 @@
-import { redirect } from 'next/navigation'
-import Image from 'next/image'
-import Link from 'next/link'
-import Header from '@/components/Header'
-import { getCurrentUser } from '@/lib/auth'
-import { getParticipantsByUserId, getEventById } from '@/lib/database'
+import { redirect } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import Header from '@/components/Header';
+import { getCurrentUser } from '@/lib/auth';
+import { getParticipantsByUserId, getEventById } from '@/lib/database';
 
 export default async function MyPage() {
-  const user = await getCurrentUser()
+  const user = await getCurrentUser();
   
   if (!user) {
-    redirect('/auth/signin')
+    redirect('/auth/signin');
   }
 
-  const participants = await getParticipantsByUserId(user.id)
+  const participants = await getParticipantsByUserId(user.id);
   
   const eventsWithDetails = await Promise.all(
     participants.map(async (participant) => {
-      const event = await getEventById(participant.event_id)
+      const event = await getEventById(participant.event_id);
       return {
         participant,
         event
-      }
+      };
     })
-  )
+  );
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
-  }
+    const date = new Date(dateStr);
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  };
 
   const formatTime = (timeStr: string) => {
-    return timeStr.slice(0, 5)
-  }
+    return timeStr.slice(0, 5);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -43,111 +43,97 @@ export default async function MyPage() {
             <div className="flex items-center space-x-4 mb-6">
               <Image
                 src={user.image}
-                alt="プロフィール"
-                width={80}
-                height={80}
+                alt="Profile"
+                width={64}
+                height={64}
                 className="rounded-full"
               />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {user.name}さんのマイページ
+                </h1>
                 <p className="text-gray-600">@{user.username}</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-4 bg-cnp-blue bg-opacity-10 rounded-lg">
-                <div className="text-3xl font-bold text-cnp-blue">
-                  {participants.length}
-                </div>
-                <div className="text-sm text-gray-600">参加イベント数</div>
-              </div>
-              
-              <div className="text-center p-4 bg-cnp-orange bg-opacity-10 rounded-lg">
-                <div className="text-3xl font-bold text-cnp-orange">
-                  {new Set(participants.map(p => p.event_id.split('-')[0])).size}
-                </div>
-                <div className="text-sm text-gray-600">訪問エリア数</div>
-              </div>
-              
-              <div className="text-center p-4 bg-cnp-yellow bg-opacity-10 rounded-lg">
-                <div className="text-3xl font-bold text-cnp-yellow">
-                  ⭐
-                </div>
-                <div className="text-sm text-gray-600">コレクター</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="cnp-card p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            📅 参加予定のイベント
-          </h2>
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">参加予定のイベント</h2>
           
           {eventsWithDetails.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📅</div>
-              <h3 className="text-xl font-medium text-gray-900 mb-2">
-                参加予定のイベントはありません
-              </h3>
-              <p className="text-gray-600 mb-6">
-                イベントに参加して交流を楽しみましょう！
-              </p>
+            <div className="cnp-card p-8 text-center">
+              <div className="text-gray-500 mb-4">
+                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4l6 6m0-6l-6 6" />
+                </svg>
+                <p className="text-lg">まだ参加予定のイベントがありません</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  イベント一覧から興味のあるイベントを見つけて参加してみましょう！
+                </p>
+              </div>
               <Link
                 href="/events"
                 className="cnp-button-primary"
               >
-                イベントを探す
+                イベント一覧を見る
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {eventsWithDetails.map(({ participant, event }) => (
-                <div
-                  key={participant.id}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
+                event && (
+                  <Link key={participant.id} href={`/events/${event.id}`} className="block">
+                    <div className="cnp-card hover:shadow-lg transition-shadow duration-200 p-6">
+                      <div className="flex items-center space-x-2 mb-3">
                         <span className="bg-cnp-blue text-white px-2 py-1 rounded-full text-xs font-medium">
-                          📅 参加予定
+                          {event.area}
                         </span>
-                        <span className="text-sm text-gray-500">
-                          {new Date(participant.created_at).toLocaleDateString('ja-JP')} 参加登録
+                        <span className="text-gray-500 text-xs">
+                          {event.prefecture}
                         </span>
                       </div>
                       
-                      {event && (
-                        <>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                            {event.name}
-                          </h3>
-                          <div className="text-sm text-gray-600 space-y-1">
-                            <p>📅 {formatDate(event.event_date)} {formatTime(event.start_time)}</p>
-                            <p>📍 {event.venue_name}</p>
-                            <p>🗾 {event.area} - {event.prefecture}</p>
-                          </div>
-                        </>
-                      )}
+                      <h3 className="font-bold text-gray-900 mb-2 text-sm line-clamp-2">
+                        {event.name}
+                      </h3>
+                      
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <div className="flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4l6 6m0-6l-6 6" />
+                          </svg>
+                          {formatDate(event.event_date)}
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {formatTime(event.start_time)}～
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          </svg>
+                          {event.venue_name}
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <span className="text-xs text-gray-500">
+                          {formatDate(participant.created_at)} に参加申込
+                        </span>
+                      </div>
                     </div>
-                    
-                    <div className="ml-4">
-                      {event && (
-                        <Link
-                          href={`/events/${event.id}`}
-                          className="cnp-button-secondary text-sm"
-                        >
-                          詳細を見る
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  </Link>
+                )
               ))}
             </div>
           )}
         </div>
+      </div>
     </div>
-  )
+  );
 }
