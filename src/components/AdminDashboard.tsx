@@ -140,17 +140,53 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       </header>
 
       <div className="container mx-auto px-4 py-8">
+        {/* 管理メニュー */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="cnp-card p-4 text-center">
+            <h3 className="font-semibold text-gray-900 mb-2">イベント管理</h3>
+            <p className="text-sm text-gray-600 mb-3">現在の表示中イベント</p>
+            <p className="text-2xl font-bold text-cnp-blue">{events.length}</p>
+          </div>
+          
+          <div className="cnp-card p-4 text-center">
+            <h3 className="font-semibold text-gray-900 mb-2">ユーザー管理</h3>
+            <p className="text-sm text-gray-600 mb-3">登録ユーザーの確認</p>
+            <button
+              onClick={() => window.open('/admin/users', '_blank')}
+              className="cnp-button-secondary text-sm w-full"
+            >
+              ユーザー一覧
+            </button>
+          </div>
+          
+          <div className="cnp-card p-4 text-center">
+            <h3 className="font-semibold text-gray-900 mb-2">イベント履歴</h3>
+            <p className="text-sm text-gray-600 mb-3">永続化されたデータ</p>
+            <button
+              onClick={() => window.open('/admin/events/masters', '_blank')}
+              className="cnp-button-secondary text-sm w-full"
+            >
+              マスター一覧
+            </button>
+          </div>
+          
+          <div className="cnp-card p-4 text-center">
+            <h3 className="font-semibold text-gray-900 mb-2">新規作成</h3>
+            <p className="text-sm text-gray-600 mb-3">イベントの追加</p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="cnp-button-primary text-sm w-full"
+            >
+              イベント作成
+            </button>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">イベント管理</h2>
-            <p className="text-gray-600">交流会イベントの作成・編集・削除を行えます</p>
+            <h2 className="text-2xl font-bold text-gray-900">現在のイベント一覧</h2>
+            <p className="text-gray-600">表示中のイベント（編集・削除可能）</p>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="cnp-button-primary"
-          >
-            新しいイベントを作成
-          </button>
         </div>
 
         {events.length === 0 ? (

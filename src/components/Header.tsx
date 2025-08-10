@@ -30,6 +30,11 @@ export default function Header() {
                 マイページ
               </Link>
             )}
+            {session && (session.user as any)?.username === 'Diagram_Wolf' && (
+              <Link href="/admin" className="text-gray-600 hover:text-cnp-blue transition-colors">
+                管理者ページ
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center space-x-4">

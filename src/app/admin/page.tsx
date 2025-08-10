@@ -1,65 +1,38 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import AdminLogin from '@/components/AdminLogin'
 import AdminDashboard from '@/components/AdminDashboard'
 
 export default function AdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const { data: session, status } = useSession()
   const router = useRouter()
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
 
   useEffect(() => {
-    checkAuthStatus()
-  }, [])
+    if (status === 'loading') return
 
-  const checkAuthStatus = async () => {
-    try {
-      const response = await fetch('/api/admin/auth/check')
-      if (response.ok) {
-        setIsAuthenticated(true)
-      } else {
-        setIsAuthenticated(false)
-      }
-    } catch (error) {
-      setIsAuthenticated(false)
+    if (!session?.user) {
+      router.push('/auth/signin')
+      return
     }
-  }
 
-  const handleLogin = async (password: string) => {
-    try {
-      const response = await fetch('/api/admin/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      })
-
-      if (response.ok) {
-        setIsAuthenticated(true)
-        return { success: true }
-      } else {
-        return { success: false, error: 'パスワードが間違っています' }
-      }
-    } catch (error) {
-      return { success: false, error: 'ログインに失敗しました' }
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/admin/auth/logout', {
-        method: 'POST',
-      })
-      setIsAuthenticated(false)
+    // Diagram_Wolfユーザーのみ許可
+    const username = (session.user as any)?.username
+    if (username === 'Diagram_Wolf') {
+      setIsAuthorized(true)
+    } else {
+      setIsAuthorized(false)
       router.push('/')
-    } catch (error) {
-      console.error('Logout error:', error)
     }
+  }, [session, status, router])
+
+  const handleLogout = () => {
+    router.push('/')
   }
 
-  if (isAuthenticated === null) {
+  if (status === 'loading' || isAuthorized === null) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cnp-blue"></div>
@@ -67,8 +40,25 @@ export default function AdminPage() {
     )
   }
 
-  if (!isAuthenticated) {
-    return <AdminLogin onLogin={handleLogin} />
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="cnp-card p-8 text-center max-w-md">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            アクセス権限がありません
+          </h1>
+          <p className="text-gray-600 mb-6">
+            この機能はDiagram_Wolfユーザーのみ利用可能です
+          </p>
+          <button
+            onClick={() => router.push('/')}
+            className="cnp-button-primary"
+          >
+            ホームに戻る
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return <AdminDashboard onLogout={handleLogout} />

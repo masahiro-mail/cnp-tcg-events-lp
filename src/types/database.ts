@@ -3,11 +3,13 @@ export interface Event {
   name: string;
   event_date: string;
   start_time: string;
+  end_time?: string;
   area: string;
   prefecture: string;
   venue_name: string;
   address: string;
   description: string;
+  announcement_url?: string;
   created_at: string;
 }
 
@@ -24,11 +26,13 @@ export interface CreateEventData {
   name: string;
   event_date: string;
   start_time: string;
+  end_time?: string;
   area: string;
   prefecture: string;
   venue_name: string;
   address: string;
   description: string;
+  announcement_url?: string;
 }
 
 export interface CreateParticipantData {

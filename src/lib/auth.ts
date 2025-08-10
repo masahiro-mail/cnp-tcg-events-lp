@@ -13,16 +13,31 @@ export interface User {
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-  const session = await getSession()
-  
-  if (!session?.user) {
+  try {
+    const session = await getSession()
+    
+    if (!session?.user) {
+      return null
+    }
+    
+    return {
+      id: session.user.id!,
+      name: session.user.name!,
+      image: session.user.image!,
+      username: (session.user as any).username,
+    }
+  } catch (error) {
+    console.error('Error getting current user:', error)
     return null
   }
-  
+}
+
+// デモ用：テスト用ユーザーでログイン状態をシミュレート
+export function getDemoUser(): User {
   return {
-    id: session.user.id!,
-    name: session.user.name!,
-    image: session.user.image!,
-    username: (session.user as any).username,
+    id: '12345678',
+    name: '田中太郎',
+    username: 'tanaka_taro',
+    image: 'https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=田'
   }
 }

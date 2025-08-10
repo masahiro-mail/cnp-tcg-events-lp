@@ -17,8 +17,16 @@ export default function SignInPage() {
   }, [router])
 
   const handleSignIn = async () => {
-    setIsLoading(true)
-    await signIn('twitter', { callbackUrl: '/' })
+    try {
+      setIsLoading(true)
+      await signIn('twitter', { 
+        callbackUrl: '/',
+        redirect: true
+      })
+    } catch (error) {
+      console.error('SignIn error:', error)
+      setIsLoading(false)
+    }
   }
 
   return (
