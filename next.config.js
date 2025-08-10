@@ -25,6 +25,11 @@ const nextConfig = {
     config.cache = false
     config.parallelism = 1
     
+    // Jest Worker を完全にモック化
+    config.resolve = config.resolve || {}
+    config.resolve.alias = config.resolve.alias || {}
+    config.resolve.alias['jest-worker'] = require('path').resolve(__dirname, 'jest-worker-mock.js')
+    
     // 環境変数でWorker無効化
     config.plugins = config.plugins || []
     config.plugins.push(
@@ -38,7 +43,7 @@ const nextConfig = {
     if (isServer) {
       // サーバー専用の追加設定
       config.externals = config.externals || []
-      config.externals.push('jest-worker')
+      // jest-workerを外部化せず、モックを使用
     }
     
     return config
