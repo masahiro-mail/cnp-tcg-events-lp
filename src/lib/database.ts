@@ -131,6 +131,15 @@ if (isLocalDev) {
           return Promise.resolve({ rows: mockData.users });
         }
         
+        if (sql.includes('SELECT id FROM events WHERE id = $1')) {
+          const eventId = params?.[0];
+          console.log('🔍 イベント存在チェック - 検索ID:', eventId);
+          console.log('🔍 現在のmockData.events:', mockData.events.map(e => ({ id: e.id, name: e.name })));
+          const event = mockData.events.find(e => e.id === eventId);
+          console.log('🔍 検索結果:', event ? '見つかった' : '見つからない');
+          return Promise.resolve({ rows: event ? [{ id: event.id }] : [] });
+        }
+        
         if (sql.includes('SELECT * FROM events WHERE id = $1')) {
           const eventId = params?.[0];
           const event = mockData.events.find(e => e.id === eventId);
