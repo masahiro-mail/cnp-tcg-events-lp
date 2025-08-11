@@ -10,6 +10,16 @@ interface EventCalendarProps {
 export default function EventCalendar({ events }: EventCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  
+  // 今日以降の未来のイベントのみフィルター
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  const futureEvents = events.filter(event => {
+    const eventDate = new Date(event.event_date)
+    eventDate.setHours(0, 0, 0, 0)
+    return eventDate >= today
+  })
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()
@@ -29,7 +39,7 @@ export default function EventCalendar({ events }: EventCalendarProps) {
     // Current month's days
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-      const hasEvent = events.some(event => event.event_date === dateStr)
+      const hasEvent = futureEvents.some(event => event.event_date === dateStr)
       days.push({ day: day.toString(), isCurrentMonth: true, hasEvent, date: dateStr })
     }
     
@@ -45,7 +55,7 @@ export default function EventCalendar({ events }: EventCalendarProps) {
   }
 
   const getEventsForDate = (date: string) => {
-    return events.filter(event => event.event_date === date)
+    return futureEvents.filter(event => event.event_date === date)
   }
 
   const days = getDaysInMonth(currentMonth)

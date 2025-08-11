@@ -22,11 +22,6 @@ export default function Header() {
             <Link href="/" className="text-gray-600 hover:text-cnp-blue transition-colors">
               ホーム
             </Link>
-            {session && (
-              <Link href="/mypage" className="text-gray-600 hover:text-cnp-blue transition-colors">
-                マイページ
-              </Link>
-            )}
             {session && session.user?.username === 'Diagram_Wolf' && (
               <Link href="/admin" className="text-gray-600 hover:text-cnp-blue transition-colors">
                 管理者ページ

@@ -8,9 +8,13 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('=== Participate API デバッグ ===');
+    console.log('Event ID:', params.id);
+    
     const session = await getServerSession(authOptions)
     
     const user = session?.user
+    console.log('User session:', user ? { id: user.id, name: user.name } : 'なし');
     
     if (!user) {
       return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 })
@@ -21,13 +25,19 @@ export async function POST(
     const userId = user.id
     const userName = user.name || ''
     const userImage = user.image || ''
+    
+    console.log('Action:', action);
+    console.log('User data:', { userId, userName, userImage: userImage ? 'あり' : 'なし' });
 
     if (action === 'join') {
+      console.log('参加表明処理開始');
       const success = await joinEvent(eventId, {
         user_x_id: userId,
         user_x_name: userName,
         user_x_icon_url: userImage
       })
+      
+      console.log('参加表明結果:', success);
       
       if (!success) {
         return NextResponse.json({ error: '既に参加済みです' }, { status: 400 })
@@ -35,7 +45,10 @@ export async function POST(
       
       return NextResponse.json({ success: true, message: '参加しました' })
     } else if (action === 'leave') {
+      console.log('参加キャンセル処理開始');
       const success = await leaveEvent(eventId, userId)
+      
+      console.log('参加キャンセル結果:', success);
       
       if (!success) {
         return NextResponse.json({ error: 'キャンセルに失敗しました' }, { status: 400 })

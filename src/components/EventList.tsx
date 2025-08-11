@@ -23,9 +23,19 @@ const AREAS = [
 export default function EventList({ events }: EventListProps) {
   const [selectedArea, setSelectedArea] = useState('全て')
 
+  // 今日以降の未来のイベントのみフィルター
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // 時間を00:00:00に設定
+  
+  const futureEvents = events.filter(event => {
+    const eventDate = new Date(event.event_date)
+    eventDate.setHours(0, 0, 0, 0)
+    return eventDate >= today
+  })
+
   const filteredEvents = selectedArea === '全て' 
-    ? events 
-    : events.filter(event => event.area === selectedArea)
+    ? futureEvents 
+    : futureEvents.filter(event => event.area === selectedArea)
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)

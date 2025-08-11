@@ -1,8 +1,16 @@
 import { Pool } from 'pg';
 import { Event, Participant, CreateEventData, CreateParticipantData, User, EventMaster, Participation, CreateUserData, DatabasePool } from '@/types/database';
 
-// ローカル開発用のモックデータベース
+// 環境判定
 const isLocalDev = process.env.DATABASE_URL?.startsWith('file:');
+const isProduction = process.env.NODE_ENV === 'production';
+const databaseUrl = process.env.DATABASE_URL;
+
+console.log('=== Database Environment ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('DATABASE_URL type:', databaseUrl ? (databaseUrl.startsWith('file:') ? 'SQLite' : 'PostgreSQL') : '未設定');
+console.log('isLocalDev:', isLocalDev);
+console.log('isProduction:', isProduction);
 
 // メモリ内データストア
 let mockData = {
@@ -15,23 +23,50 @@ let mockData = {
 
 // テストデータの初期化
 if (isLocalDev && typeof window === 'undefined') {
-  // サーバーサイドでテストデータを初期化
-  setTimeout(() => {
-    try {
-      const { generateTestUsers, generateTestEventMasters, generateTestEvents } = require('./mock-data');
-      
-      mockData.users = generateTestUsers();
-      mockData.event_masters = generateTestEventMasters();
-      mockData.events = generateTestEvents();
-      
-      console.log('🎯 テストデータを読み込みました');
-      console.log(`- ユーザー: ${mockData.users.length}人`);
-      console.log(`- イベントマスター: ${mockData.event_masters.length}件`);
-      console.log(`- 現在のイベント: ${mockData.events.length}件`);
-    } catch (error) {
-      console.log('テストデータの読み込みをスキップ:', error.message);
-    }
-  }, 100);
+  // サーバーサイドでテストデータを同期的に初期化
+  try {
+    const { generateTestUsers, generateTestEventMasters, generateTestEvents } = require('./mock-data');
+    
+    mockData.users = generateTestUsers();
+    mockData.event_masters = generateTestEventMasters();
+    mockData.events = generateTestEvents();
+    
+    // テスト参加者データを追加（マイページのテスト用）
+    mockData.participants = [
+      {
+        id: "participant_1",
+        event_id: "current_event_1",
+        user_x_id: "12345678", // 田中太郎
+        user_x_name: "田中太郎",
+        user_x_icon_url: "https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=田",
+        created_at: "2025-01-10T14:30:00.000Z"
+      },
+      {
+        id: "participant_2", 
+        event_id: "current_event_3",
+        user_x_id: "12345678", // 田中太郎
+        user_x_name: "田中太郎",
+        user_x_icon_url: "https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=田",
+        created_at: "2025-01-11T10:15:00.000Z"
+      },
+      {
+        id: "participant_3",
+        event_id: "current_event_2", 
+        user_x_id: "87654321", // 鈴木花子
+        user_x_name: "鈴木花子",
+        user_x_icon_url: "https://via.placeholder.com/64x64/EC4899/FFFFFF?text=鈴",
+        created_at: "2025-01-09T16:45:00.000Z"
+      }
+    ];
+    
+    console.log('🎯 テストデータを読み込みました');
+    console.log(`- ユーザー: ${mockData.users.length}人`);
+    console.log(`- イベントマスター: ${mockData.event_masters.length}件`);
+    console.log(`- 現在のイベント: ${mockData.events.length}件`);
+    console.log(`- 参加者: ${mockData.participants.length}件`);
+  } catch (error) {
+    console.log('テストデータの読み込みをスキップ:', error.message);
+  }
 }
 
 const generateId = () => Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -137,6 +172,12 @@ if (isLocalDev) {
           return Promise.resolve({ rows: participants });
         }
         
+        if (sql.includes('SELECT * FROM participants WHERE user_x_id = $1')) {
+          const userId = params?.[0];
+          const participants = mockData.participants.filter(p => p.user_x_id === userId);
+          return Promise.resolve({ rows: participants });
+        }
+        
         if (sql.includes('SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2')) {
           const [eventId, userId] = params || [];
           const participant = mockData.participants.find(p => p.event_id === eventId && p.user_x_id === userId);
@@ -194,7 +235,6 @@ if (isLocalDev) {
 
 // フォールバック用のメモリ内モックデータストア
 let mockEvents: Event[] = [];
-let mockParticipants: Participant[] = [];
 
 export const initDatabase = async () => {
   if (!pool) {
@@ -291,6 +331,37 @@ export const initDatabase = async () => {
       `);
       
       console.log('Database initialized successfully');
+      
+      // 本番環境または初回起動時にイベントデータが空の場合、サンプルデータを追加
+      const eventCount = await client.query('SELECT COUNT(*) FROM events');
+      const currentEventCount = parseInt(eventCount.rows[0].count);
+      console.log(`現在のイベント数: ${currentEventCount}`);
+      
+      if (currentEventCount === 0) {
+        const { generateTestEvents } = require('./mock-data');
+        const sampleEvents = generateTestEvents();
+        
+        console.log(`サンプルイベントデータを追加中: ${sampleEvents.length}件`);
+        for (const event of sampleEvents) {
+          try {
+            await client.query(`
+              INSERT INTO events (id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, created_at)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
+              ON CONFLICT (id) DO NOTHING
+            `, [event.id, event.name, event.event_date, event.start_time, event.end_time || null, event.organizer || 'CNPトレカ交流会', event.area, event.prefecture, event.venue_name, event.address, event.url || null, event.description]);
+            console.log(`✓ イベント追加: ${event.id} - ${event.name}`);
+          } catch (error) {
+            console.error(`✗ イベント追加失敗: ${event.id}`, error);
+          }
+        }
+        
+        console.log(`サンプルイベントデータ追加完了: ${sampleEvents.length}件`);
+      }
+      
+      // デバッグ用：現在のイベント数とparticipants数を確認
+      const eventCountResult = await client.query('SELECT COUNT(*) FROM events');
+      const participantCountResult = await client.query('SELECT COUNT(*) FROM participants');
+      console.log(`Database status - Events: ${eventCountResult.rows[0].count}, Participants: ${participantCountResult.rows[0].count}`);
     } finally {
       client.release();
     }
@@ -483,7 +554,7 @@ export const deleteEvent = async (id: string): Promise<boolean> => {
 export const getParticipantsByEventId = async (eventId: string): Promise<Participant[]> => {
   if (!pool) {
     console.warn('Database not configured, returning mock participants');
-    return mockParticipants.filter(p => p.event_id === eventId).sort((a, b) => 
+    return mockData.participants.filter(p => p.event_id === eventId).sort((a, b) => 
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
   }
@@ -498,16 +569,25 @@ export const getParticipantsByEventId = async (eventId: string): Promise<Partici
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    return mockParticipants.filter(p => p.event_id === eventId).sort((a, b) => 
+    return mockData.participants.filter(p => p.event_id === eventId).sort((a, b) => 
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
   }
 };
 
 export const getParticipantsByUserId = async (userId: string): Promise<Participant[]> => {
+  console.log('=== getParticipantsByUserId デバッグ ===');
+  console.log('Requested userId:', userId);
+  console.log('Pool configured:', !!pool);
+  console.log('Is local dev:', isLocalDev);
+  
   if (!pool) {
     console.warn('Database not configured, returning mock participants');
-    return mockParticipants.filter(p => p.user_x_id === userId).sort((a, b) => 
+    // 統合されたmockData.participantsを使用
+    const filtered = mockData.participants.filter(p => p.user_x_id === userId);
+    console.log('Mock filtered participants:', filtered.length);
+    console.log('Mock participants data:', filtered);
+    return filtered.sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
   }
@@ -515,14 +595,17 @@ export const getParticipantsByUserId = async (userId: string): Promise<Participa
   try {
     const client = await pool.connect();
     try {
+      console.log('PostgreSQL: Connected for getParticipantsByUserId');
       const result = await client.query('SELECT * FROM participants WHERE user_x_id = $1 ORDER BY created_at DESC', [userId]);
+      console.log('PostgreSQL: Found participants:', result.rows.length);
+      console.log('PostgreSQL: Participant data:', result.rows);
       return result.rows;
     } finally {
       client.release();
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    return mockParticipants.filter(p => p.user_x_id === userId).sort((a, b) => 
+    return mockData.participants.filter(p => p.user_x_id === userId).sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
   }
@@ -622,7 +705,7 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
   if (!pool) {
     console.warn('Database not configured, creating mock participant');
     // 重複チェック
-    const existingParticipant = mockParticipants.find(
+    const existingParticipant = mockData.participants.find(
       p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
     );
     if (existingParticipant) {
@@ -639,8 +722,8 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
       created_at: new Date().toISOString()
     };
     
-    mockParticipants.push(newParticipant);
-    console.log('Mock participant added. Total participants:', mockParticipants.length);
+    mockData.participants.push(newParticipant);
+    console.log('Mock participant added. Total participants:', mockData.participants.length);
     return newParticipant;
   }
 
@@ -665,7 +748,7 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
   } catch (error) {
     console.error('Database connection error:', error);
     // エラー時もモックデータで処理
-    const existingParticipant = mockParticipants.find(
+    const existingParticipant = mockData.participants.find(
       p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
     );
     if (existingParticipant) {
@@ -681,8 +764,8 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
       created_at: new Date().toISOString()
     };
     
-    mockParticipants.push(newParticipant);
-    console.log('Mock participant added after error. Total participants:', mockParticipants.length);
+    mockData.participants.push(newParticipant);
+    console.log('Mock participant added after error. Total participants:', mockData.participants.length);
     return newParticipant;
   }
 };
@@ -693,6 +776,12 @@ export const joinEvent = async (eventId: string, userData: {
   user_x_name: string;
   user_x_icon_url: string;
 }): Promise<boolean> => {
+  console.log('=== joinEvent デバッグ ===');
+  console.log('Event ID:', eventId);
+  console.log('User data:', userData);
+  console.log('Pool configured:', !!pool);
+  console.log('Is local dev:', isLocalDev);
+  
   if (!pool) {
     console.warn('Database not configured, using mock data for joinEvent');
     // ユーザー情報を永続化
@@ -709,6 +798,7 @@ export const joinEvent = async (eventId: string, userData: {
     );
     
     if (existingParticipant) {
+      console.log('Mock: Already participating');
       return false; // 既に参加済み
     }
     
@@ -723,11 +813,22 @@ export const joinEvent = async (eventId: string, userData: {
     };
     mockData.participants.push(participant);
     console.log('Mock participant added:', participant.id);
+    console.log('Total mock participants:', mockData.participants.length);
     return true;
   }
 
   const client = await pool.connect();
   try {
+    console.log('PostgreSQL: Connected to database');
+    
+    // イベント存在チェック
+    const eventCheck = await client.query('SELECT id FROM events WHERE id = $1', [eventId]);
+    console.log('Event exists:', eventCheck.rows.length > 0);
+    if (eventCheck.rows.length === 0) {
+      console.error('Event not found:', eventId);
+      return false;
+    }
+    
     // ユーザー情報を永続化
     await upsertUser({
       x_id: userData.user_x_id,
@@ -735,23 +836,28 @@ export const joinEvent = async (eventId: string, userData: {
       x_username: userData.user_x_name,
       x_icon_url: userData.user_x_icon_url
     });
+    console.log('User upserted successfully');
     
     // 既存参加チェック
     const existingResult = await client.query(
       'SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2',
       [eventId, userData.user_x_id]
     );
+    console.log('Existing participants found:', existingResult.rows.length);
     
     if (existingResult.rows.length > 0) {
+      console.log('PostgreSQL: Already participating');
       return false; // 既に参加済み
     }
     
     // 参加者を追加
-    await client.query(`
+    const insertResult = await client.query(`
       INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
       VALUES ($1, $2, $3, $4)
+      RETURNING id
     `, [eventId, userData.user_x_id, userData.user_x_name, userData.user_x_icon_url]);
     
+    console.log('PostgreSQL: Participant added with ID:', insertResult.rows[0].id);
     return true;
   } catch (error: unknown) {
     console.error('Error joining event:', error);

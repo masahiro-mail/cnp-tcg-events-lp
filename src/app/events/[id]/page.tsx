@@ -130,9 +130,9 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             <div className="mt-6 space-y-4">
               <ParticipateButton eventId={params.id} />
               <TwitterPostButton 
-                text={`${event.name}に参加予定！CNPトレカ交流会で楽しみましょう🃏`}
-                url={typeof window !== 'undefined' ? window.location.href : ''}
-                hashtags={['CNP', 'トレーディングカード', '交流会', event.area]}
+                text={`${event.name}開催決定🎉詳細は以下のURLよりご確認下さい😊 #CNP #CNPトレカ #交流会 #${event.area}`}
+                url={`https://www.event.cnp-traingcard.com/${params.id}`}
+                hashtags={[]}
               />
             </div>
           </div>

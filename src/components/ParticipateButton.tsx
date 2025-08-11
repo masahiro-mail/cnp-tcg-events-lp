@@ -136,11 +136,6 @@ export default function ParticipateButton({ eventId, onParticipationChange }: Pa
           </button>
         </>
       )}
-      <div className="bg-cnp-yellow bg-opacity-20 border border-cnp-yellow rounded-lg p-3 mt-4">
-        <p className="text-sm text-gray-700">
-          💡 スタンプは会場でのみ獲得できます
-        </p>
-      </div>
     </div>
   )
 }

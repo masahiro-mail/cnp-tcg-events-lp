@@ -25,9 +25,9 @@ export default async function HomePage() {
           </p>
           <div className="flex justify-center">
             <TwitterPostButton 
-              text="CNPトレカ交流会で全国のイベント情報をチェック中！みんなで交流しましょう🃏"
-              url={typeof window !== 'undefined' ? window.location.href : ''}
-              hashtags={['CNP', 'トレーディングカード', '交流会']}
+              text="今後のCNPトレカ交流会、イベントの情報はこちら！みんなでCNPトレカで交流しましょう🔥 #CNP #CNPトレカ #交流会"
+              url="https://www.event.cnp-traingcard.com"
+              hashtags={[]}
             />
           </div>
         </div>
@@ -48,31 +48,6 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="text-center">
-          <div className="cnp-card p-8 max-w-2xl mx-auto">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              🚧 スタンプ機能（準備中）
-            </h3>
-            <p className="text-gray-600 mb-6">
-              各イベントに参加すると記念スタンプを獲得できる機能を準備中です。
-              現在はイベント参加のみご利用いただけます。
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="/mypage"
-                className="cnp-button-primary text-center"
-              >
-                マイページを見る
-              </a>
-              <a
-                href="#events"
-                className="cnp-button-secondary text-center"
-              >
-                イベント一覧
-              </a>
-            </div>
-          </div>
-        </div>
       </div>
       
       {/* フッター - クレジット */}
