@@ -21,7 +21,6 @@ export default async function HomePage() {
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
             全国のCNPトレーディングカード交流会情報をお届け。
-            参加してスタンプを集めよう！
           </p>
           <div className="flex justify-center">
             <TwitterPostButton 

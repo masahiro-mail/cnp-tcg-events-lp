@@ -32,6 +32,16 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
+export async function isAdminUser(): Promise<boolean> {
+  try {
+    const user = await getCurrentUser()
+    return user?.username === 'Diagram_Wolf'
+  } catch (error) {
+    console.error('Error checking admin user:', error)
+    return false
+  }
+}
+
 // デモ用：テスト用ユーザーでログイン状態をシミュレート
 export function getDemoUser(): User {
   return {

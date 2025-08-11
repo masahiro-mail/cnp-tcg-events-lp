@@ -1,23 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateEvent, deleteEvent } from '@/lib/database'
-
-function isAdminAuthenticated(request: NextRequest): boolean {
-  const cookies = request.headers.get('cookie')
-  if (!cookies) return false
-  
-  const adminAuth = cookies
-    .split(';')
-    .find(cookie => cookie.trim().startsWith('admin-auth='))
-    ?.split('=')[1]
-  
-  return adminAuth === 'authenticated'
-}
+import { isAdminUser } from '@/lib/auth'
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  if (!isAdminAuthenticated(request)) {
+  const isAdmin = await isAdminUser()
+  if (!isAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -54,7 +44,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  if (!isAdminAuthenticated(request)) {
+  const isAdmin = await isAdminUser()
+  if (!isAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
