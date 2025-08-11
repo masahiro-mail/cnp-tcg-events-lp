@@ -54,9 +54,9 @@
 ### 2. 環境変数確認
 `.env.local`の設定内容：
 ```env
-# Twitter OAuth - 設定済み
-TWITTER_CLIENT_ID=SExhb1ZFUU5IOTRkamlVS3RKMzA6MTpjaQ
-TWITTER_CLIENT_SECRET=ShjOxxL-UYflby4xlMwKNVmQYiNu3ohlY82i30kx-r03BtqnJI
+# Twitter OAuth - 実際の値に置き換えてください
+TWITTER_CLIENT_ID=your-twitter-client-id-here
+TWITTER_CLIENT_SECRET=****8vE0f9
 
 # NextAuth.js
 NEXTAUTH_URL=http://localhost:3000

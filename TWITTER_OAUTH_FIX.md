@@ -78,8 +78,8 @@ npm run dev
 ### エラー: "Client authentication failed"
 ➜ Client IDとSecretが正しく設定されているか確認
 ```
-TWITTER_CLIENT_ID=SExhb1ZFUU5IOTRkamlVS3RKMzA6MTpjaQ
-TWITTER_CLIENT_SECRET=ShjOxxL-UYflby4xlMwKNVmQYiNu3ohlY82i30kx-r03BtqnJI
+TWITTER_CLIENT_ID=your-twitter-client-id-here
+TWITTER_CLIENT_SECRET=****8vE0f9
 ```
 
 ### エラー: "App suspended"

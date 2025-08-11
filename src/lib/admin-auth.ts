@@ -1,11 +1,14 @@
 import bcrypt from 'bcryptjs'
 
-const ADMIN_PASSWORD = 'admin123'
-
 export async function verifyAdminPassword(password: string): Promise<boolean> {
   try {
-    // シンプルな文字列比較
-    return password === ADMIN_PASSWORD
+    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH
+    if (!adminPasswordHash) {
+      console.error('ADMIN_PASSWORD_HASH environment variable not set')
+      return false
+    }
+    
+    return await bcrypt.compare(password, adminPasswordHash)
   } catch (error) {
     console.error('Admin password verification error:', error)
     return false

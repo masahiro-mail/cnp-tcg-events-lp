@@ -3,11 +3,14 @@
 import { signIn, getSession, getProviders } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function SignInPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [providers, setProviders] = useState<Record<string, any> | null>(null)
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [privacyAccepted, setPrivacyAccepted] = useState(false)
 
   useEffect(() => {
     getSession().then((session) => {
@@ -17,12 +20,16 @@ export default function SignInPage() {
     })
     
     getProviders().then((providers) => {
-      console.log('Available providers:', providers)
       setProviders(providers)
     })
   }, [router])
 
   const handleSignIn = async () => {
+    if (!termsAccepted || !privacyAccepted) {
+      alert('利用規約とプライバシーポリシーに同意してください')
+      return
+    }
+
     try {
       setIsLoading(true)
       await signIn('twitter', { 
@@ -42,10 +49,55 @@ export default function SignInPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">CNPトレカ交流会</h1>
           <p className="text-gray-600">Xアカウントでログインしてください</p>
         </div>
+
+        <div className="mb-6 text-left space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">ログインする前に</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            サービスをご利用いただく前に、以下の内容をご確認いただき、同意をお願いいたします。
+          </p>
+          
+          <div className="space-y-3">
+            <label className="flex items-start space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="mt-1 h-4 w-4 text-cnp-blue focus:ring-cnp-blue border-gray-300 rounded"
+              />
+              <span className="text-sm text-gray-700">
+                <Link href="/terms" target="_blank" className="text-cnp-blue hover:underline">
+                  利用規約
+                </Link>
+                に同意します
+              </span>
+            </label>
+
+            <label className="flex items-start space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={privacyAccepted}
+                onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                className="mt-1 h-4 w-4 text-cnp-blue focus:ring-cnp-blue border-gray-300 rounded"
+              />
+              <span className="text-sm text-gray-700">
+                <Link href="/privacy" target="_blank" className="text-cnp-blue hover:underline">
+                  プライバシーポリシー
+                </Link>
+                に同意します
+              </span>
+            </label>
+          </div>
+
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <p className="text-xs text-gray-600">
+              ログインにより以下の情報を取得します：Xユーザー名、アイコン、ユーザーID
+            </p>
+          </div>
+        </div>
         
         <button
           onClick={handleSignIn}
-          disabled={isLoading}
+          disabled={isLoading || !termsAccepted || !privacyAccepted}
           className="cnp-button-primary w-full flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (

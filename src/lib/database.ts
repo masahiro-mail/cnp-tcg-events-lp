@@ -6,11 +6,6 @@ const isLocalDev = process.env.DATABASE_URL?.startsWith('file:');
 const isProduction = process.env.NODE_ENV === 'production';
 const databaseUrl = process.env.DATABASE_URL;
 
-console.log('=== Database Environment ===');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('DATABASE_URL type:', databaseUrl ? (databaseUrl.startsWith('file:') ? 'SQLite' : 'PostgreSQL') : '未設定');
-console.log('isLocalDev:', isLocalDev);
-console.log('isProduction:', isProduction);
 
 // メモリ内データストア
 let mockData = {
@@ -210,7 +205,7 @@ if (isLocalDev) {
 } else {
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false,
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
@@ -560,10 +555,6 @@ export const getParticipantsByEventId = async (eventId: string): Promise<Partici
 };
 
 export const getParticipantsByUserId = async (userId: string): Promise<Participant[]> => {
-  console.log('=== getParticipantsByUserId デバッグ ===');
-  console.log('Requested userId:', userId);
-  console.log('Pool configured:', !!pool);
-  console.log('Is local dev:', isLocalDev);
   
   if (!pool) {
     console.warn('Database not configured, returning mock participants');
@@ -760,11 +751,6 @@ export const joinEvent = async (eventId: string, userData: {
   user_x_name: string;
   user_x_icon_url: string;
 }): Promise<boolean> => {
-  console.log('=== joinEvent デバッグ ===');
-  console.log('Event ID:', eventId);
-  console.log('User data:', userData);
-  console.log('Pool configured:', !!pool);
-  console.log('Is local dev:', isLocalDev);
   
   if (!pool) {
     console.warn('Database not configured, using mock data for joinEvent');
