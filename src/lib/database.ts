@@ -412,8 +412,8 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       description: data.description,
       created_at: new Date().toISOString()
     };
-    mockEvents.push(newEvent);
-    console.log('Mock event added. Total mock events:', mockEvents.length);
+    mockData.events.push(newEvent);
+    console.log('Mock event added. Total mock events:', mockData.events.length);
     return newEvent;
   }
 
@@ -792,53 +792,56 @@ export const joinEvent = async (eventId: string, userData: {
     return true;
   }
 
-  const client = await pool.connect();
   try {
-    console.log('PostgreSQL: Connected to database');
+    const client = await pool.connect();
     
-    // イベント存在チェック
-    const eventCheck = await client.query('SELECT id FROM events WHERE id = $1', [eventId]);
-    console.log('Event exists:', eventCheck.rows.length > 0);
-    if (eventCheck.rows.length === 0) {
-      console.error('Event not found:', eventId);
-      return false;
+    try {
+      console.log('PostgreSQL: Connected to database');
+      
+      // イベント存在チェック（モックシステム経由）
+      const eventCheck = await client.query('SELECT id FROM events WHERE id = $1', [eventId]);
+      console.log('Event exists:', eventCheck.rows.length > 0);
+      if (eventCheck.rows.length === 0) {
+        console.error('Event not found:', eventId);
+        return false;
+      }
+      
+      // ユーザー情報を永続化
+      await upsertUser({
+        x_id: userData.user_x_id,
+        x_name: userData.user_x_name,
+        x_username: userData.user_x_name,
+        x_icon_url: userData.user_x_icon_url
+      });
+      console.log('User upserted successfully');
+      
+      // 既存参加チェック（モックシステム経由）
+      const existingResult = await client.query(
+        'SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2',
+        [eventId, userData.user_x_id]
+      );
+      console.log('Existing participants found:', existingResult.rows.length);
+      
+      if (existingResult.rows.length > 0) {
+        console.log('PostgreSQL: Already participating');
+        return false; // 既に参加済み
+      }
+      
+      // 参加者を追加（モックシステム経由）
+      const insertResult = await client.query(`
+        INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
+      `, [eventId, userData.user_x_id, userData.user_x_name, userData.user_x_icon_url]);
+      
+      console.log('PostgreSQL: Participant added with ID:', insertResult.rows[0].id);
+      return true;
+    } finally {
+      client.release();
     }
-    
-    // ユーザー情報を永続化
-    await upsertUser({
-      x_id: userData.user_x_id,
-      x_name: userData.user_x_name,
-      x_username: userData.user_x_name,
-      x_icon_url: userData.user_x_icon_url
-    });
-    console.log('User upserted successfully');
-    
-    // 既存参加チェック
-    const existingResult = await client.query(
-      'SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2',
-      [eventId, userData.user_x_id]
-    );
-    console.log('Existing participants found:', existingResult.rows.length);
-    
-    if (existingResult.rows.length > 0) {
-      console.log('PostgreSQL: Already participating');
-      return false; // 既に参加済み
-    }
-    
-    // 参加者を追加
-    const insertResult = await client.query(`
-      INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id
-    `, [eventId, userData.user_x_id, userData.user_x_name, userData.user_x_icon_url]);
-    
-    console.log('PostgreSQL: Participant added with ID:', insertResult.rows[0].id);
-    return true;
   } catch (error: unknown) {
     console.error('Error joining event:', error);
     return false;
-  } finally {
-    client.release();
   }
 };
 
