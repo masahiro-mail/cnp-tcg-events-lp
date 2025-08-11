@@ -31,33 +31,8 @@ if (isLocalDev && typeof window === 'undefined') {
     mockData.event_masters = generateTestEventMasters();
     mockData.events = generateTestEvents();
     
-    // テスト参加者データを追加（マイページのテスト用）
-    mockData.participants = [
-      {
-        id: "participant_1",
-        event_id: "current_event_1",
-        user_x_id: "12345678", // 田中太郎
-        user_x_name: "田中太郎",
-        user_x_icon_url: "https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=田",
-        created_at: "2025-01-10T14:30:00.000Z"
-      },
-      {
-        id: "participant_2", 
-        event_id: "current_event_3",
-        user_x_id: "12345678", // 田中太郎
-        user_x_name: "田中太郎",
-        user_x_icon_url: "https://via.placeholder.com/64x64/4F46E5/FFFFFF?text=田",
-        created_at: "2025-01-11T10:15:00.000Z"
-      },
-      {
-        id: "participant_3",
-        event_id: "current_event_2", 
-        user_x_id: "87654321", // 鈴木花子
-        user_x_name: "鈴木花子",
-        user_x_icon_url: "https://via.placeholder.com/64x64/EC4899/FFFFFF?text=鈴",
-        created_at: "2025-01-09T16:45:00.000Z"
-      }
-    ];
+    // 参加者データを空で初期化
+    mockData.participants = [];
     
     console.log('🎯 テストデータを読み込みました');
     console.log(`- ユーザー: ${mockData.users.length}人`);

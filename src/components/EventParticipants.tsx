@@ -48,8 +48,8 @@ export default function EventParticipants({ eventId, initialParticipants }: Even
     }
   }, [])
 
-  // 参加者数（開催者1名 + 参加者数）
-  const totalParticipants = participants.length + 1
+  // 参加者数（参加者のみ）
+  const totalParticipants = participants.length
 
   return (
     <div className="space-y-6">
@@ -65,7 +65,7 @@ export default function EventParticipants({ eventId, initialParticipants }: Even
           <span className="text-lg text-gray-500 ml-1">人</span>
         </p>
         <p className="text-xs text-gray-400 mt-1">
-          開催者1名 + 参加者{participants.length}名
+          参加者{participants.length}名
         </p>
       </div>
 
@@ -74,26 +74,6 @@ export default function EventParticipants({ eventId, initialParticipants }: Even
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           参加メンバー ({totalParticipants}人)
         </h2>
-        
-        {/* 開催者表示 */}
-        <div className="mb-4 p-3 bg-cnp-yellow bg-opacity-20 border border-cnp-yellow rounded-lg">
-          <div className="flex items-center space-x-3">
-            <Image
-              src="https://via.placeholder.com/40x40/3B82F6/FFFFFF?text=CNP"
-              alt="CNP運営チーム"
-              width={40}
-              height={40}
-              className="rounded-full border-2 border-cnp-yellow"
-            />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">CNP運営チーム</p>
-              <p className="text-xs text-gray-500">イベントを主催しています</p>
-            </div>
-            <div className="bg-cnp-yellow text-cnp-yellow bg-opacity-30 px-2 py-1 rounded-full text-xs font-medium">
-              主催者
-            </div>
-          </div>
-        </div>
 
         {participants.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
