@@ -22,11 +22,10 @@ if (isLocalDev && typeof window === 'undefined') {
   try {
     const { generateTestUsers, generateTestEventMasters, generateTestEvents } = require('./mock-data');
     
-    mockData.users = generateTestUsers();
-    mockData.event_masters = generateTestEventMasters();
-    mockData.events = generateTestEvents();
-    
-    // 参加者データを空で初期化
+    // 本番リリース用：空の状態で初期化
+    mockData.users = [];
+    mockData.event_masters = [];
+    mockData.events = [];
     mockData.participants = [];
     
     console.log('🎯 テストデータを読み込みました');
@@ -314,28 +313,8 @@ export const initDatabase = async () => {
       // 本番環境または初回起動時にイベントデータが空の場合、サンプルデータを追加
       const eventCount = await client.query('SELECT COUNT(*) FROM events');
       const currentEventCount = parseInt(eventCount.rows[0].count);
-      console.log(`現在のイベント数: ${currentEventCount}`);
       
-      if (currentEventCount === 0) {
-        const { generateTestEvents } = require('./mock-data');
-        const sampleEvents = generateTestEvents();
-        
-        console.log(`サンプルイベントデータを追加中: ${sampleEvents.length}件`);
-        for (const event of sampleEvents) {
-          try {
-            await client.query(`
-              INSERT INTO events (id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, created_at)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
-              ON CONFLICT (id) DO NOTHING
-            `, [event.id, event.name, event.event_date, event.start_time, event.end_time || null, event.organizer || 'CNPトレカ交流会', event.area, event.prefecture, event.venue_name, event.address, event.url || null, event.description]);
-            console.log(`✓ イベント追加: ${event.id} - ${event.name}`);
-          } catch (error) {
-            console.error(`✗ イベント追加失敗: ${event.id}`, error);
-          }
-        }
-        
-        console.log(`サンプルイベントデータ追加完了: ${sampleEvents.length}件`);
-      }
+      // 本番リリース用：サンプルデータは追加しない
       
       // デバッグ用：現在のイベント数とparticipants数を確認
       const eventCountResult = await client.query('SELECT COUNT(*) FROM events');

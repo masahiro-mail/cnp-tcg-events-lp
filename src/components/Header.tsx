@@ -22,6 +22,14 @@ export default function Header() {
             <Link href="/" className="text-gray-600 hover:text-cnp-blue transition-colors">
               ホーム
             </Link>
+            <a 
+              href="https://www.cnp-tradingcard.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-cnp-blue transition-colors"
+            >
+              CNPトレカファンサイト
+            </a>
             {session && session.user?.username === 'Diagram_Wolf' && (
               <Link href="/admin" className="text-gray-600 hover:text-cnp-blue transition-colors">
                 管理者ページ
