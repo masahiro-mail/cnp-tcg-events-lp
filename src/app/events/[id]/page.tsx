@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Header from '@/components/Header'
 import ParticipateButton from '@/components/ParticipateButton'
 import EventParticipants from '@/components/EventParticipants'
+import TwitterPostButton from '@/components/TwitterPostButton'
 import { getEventById, getParticipantsByEventId } from '@/lib/database'
 
 interface EventDetailPageProps {
@@ -111,14 +112,6 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
                   )}
                 </div>
 
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">参加者数</h3>
-                  <p className="text-3xl font-bold text-cnp-blue">
-                    {participants.length + 1}
-                    <span className="text-lg text-gray-500 ml-1">人</span>
-                  </p>
-                  <p className="text-xs text-gray-500">（主催者 + 参加者）</p>
-                </div>
               </div>
 
               <div>
@@ -134,8 +127,13 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
 
           <div className="lg:col-span-1">
             <EventParticipants eventId={params.id} initialParticipants={participants} />
-            <div className="mt-6">
+            <div className="mt-6 space-y-4">
               <ParticipateButton eventId={params.id} />
+              <TwitterPostButton 
+                text={`${event.name}に参加予定！CNPトレカ交流会で楽しみましょう🃏`}
+                url={typeof window !== 'undefined' ? window.location.href : ''}
+                hashtags={['CNP', 'トレーディングカード', '交流会', event.area]}
+              />
             </div>
           </div>
         </div>

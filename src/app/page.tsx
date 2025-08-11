@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import Header from '@/components/Header'
 import EventCalendar from '@/components/EventCalendar'
 import EventList from '@/components/EventList'
+import TwitterPostButton from '@/components/TwitterPostButton'
 import { getEvents } from '@/lib/database'
 
 export const dynamic = 'force-dynamic'
@@ -18,10 +19,17 @@ export default async function HomePage() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             CNPトレカ交流会
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
             全国のCNPトレーディングカード交流会情報をお届け。
             参加してスタンプを集めよう！
           </p>
+          <div className="flex justify-center">
+            <TwitterPostButton 
+              text="CNPトレカ交流会で全国のイベント情報をチェック中！みんなで交流しましょう🃏"
+              url={typeof window !== 'undefined' ? window.location.href : ''}
+              hashtags={['CNP', 'トレーディングカード', '交流会']}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
@@ -43,11 +51,11 @@ export default async function HomePage() {
         <div className="text-center">
           <div className="cnp-card p-8 max-w-2xl mx-auto">
             <h3 className="text-xl font-bold text-gray-900 mb-4">
-              🎯 スタンプを集めて交流しよう！
+              🚧 スタンプ機能（準備中）
             </h3>
             <p className="text-gray-600 mb-6">
-              各イベントに参加すると記念スタンプを獲得できます。
-              マイページで参加履歴をチェックしましょう。
+              各イベントに参加すると記念スタンプを獲得できる機能を準備中です。
+              現在はイベント参加のみご利用いただけます。
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
@@ -66,6 +74,15 @@ export default async function HomePage() {
           </div>
         </div>
       </div>
+      
+      {/* フッター - クレジット */}
+      <footer className="bg-gray-50 border-t border-gray-200 py-6 mt-12">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm text-gray-500">
+            Created by 図解師★ウルフ
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }

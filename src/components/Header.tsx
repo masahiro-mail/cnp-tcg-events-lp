@@ -22,9 +22,6 @@ export default function Header() {
             <Link href="/" className="text-gray-600 hover:text-cnp-blue transition-colors">
               ホーム
             </Link>
-            <Link href="/events" className="text-gray-600 hover:text-cnp-blue transition-colors">
-              イベント一覧
-            </Link>
             {session && (
               <Link href="/mypage" className="text-gray-600 hover:text-cnp-blue transition-colors">
                 マイページ

@@ -32,7 +32,8 @@
       "Bash(touch:*)",
       "Bash(node:*)",
       "WebFetch(domain:cnp-trading-card-event-calendar.up.railway.app)",
-      "Bash(npm:*)"
+      "Bash(npm:*)",
+      "WebFetch(domain:cnp-tcg-events-lp-production.up.railway.app)"
     ],
     "deny": []
   }
