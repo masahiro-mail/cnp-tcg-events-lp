@@ -89,7 +89,7 @@ export default async function EventsPage() {
                   href={`/events/${event.id}`}
                   className="block w-full text-center bg-cnp-blue text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
-                  詳細を見る
+                  詳細
                 </Link>
               </div>
             ))}

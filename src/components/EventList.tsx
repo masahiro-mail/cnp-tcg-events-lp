@@ -108,7 +108,7 @@ export default function EventList({ events }: EventListProps) {
                     href={`/events/${event.id}`}
                     className="cnp-button-primary text-sm"
                   >
-                    詳細を見る
+                    詳細
                   </Link>
                 </div>
               </div>
