@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import type { Metadata } from 'next'
 import Header from '@/components/Header'
 import ParticipateButton from '@/components/ParticipateButton'
 import EventParticipants from '@/components/EventParticipants'
@@ -10,6 +11,63 @@ import { getEventById, getParticipantsByEventId } from '@/lib/database'
 interface EventDetailPageProps {
   params: {
     id: string
+  }
+}
+
+export async function generateMetadata({ params }: EventDetailPageProps): Promise<Metadata> {
+  const event = await getEventById(params.id)
+  
+  if (!event) {
+    return {
+      title: 'イベントが見つかりません',
+    }
+  }
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
+  }
+
+  const formatTime = (timeStr: string) => {
+    return timeStr.slice(0, 5)
+  }
+
+  const eventDateTime = `${formatDate(event.event_date)} ${formatTime(event.start_time)}`
+  const description = `【${event.area}・${event.prefecture}】${eventDateTime}開催！${event.venue_name}で開催されるCNPトレカ交流会。${event.description.slice(0, 80)}...`
+  
+  const title = `${event.name} | CNPトレカ交流会`
+  const url = `https://cnp-tcg-events-lp-production.up.railway.app/events/${params.id}`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: 'CNPトレカ交流会',
+      images: [
+        {
+          url: `https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=${encodeURIComponent(event.name)}%20-%20CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A`,
+          width: 1200,
+          height: 630,
+          alt: `${event.name} - CNPトレカ交流会`,
+        }
+      ],
+      locale: 'ja_JP',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=${encodeURIComponent(event.name)}%20-%20CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A`],
+      site: '@cnp_ninjadao',
+      creator: '@cnp_ninjadao',
+    },
+    alternates: {
+      canonical: url,
+    },
   }
 }
 

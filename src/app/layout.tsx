@@ -3,8 +3,63 @@ import './globals.css'
 import AuthProvider from '@/components/AuthProvider'
 
 export const metadata: Metadata = {
-  title: 'CNPトレカ交流会',
-  description: 'CNPトレカ交流会の情報サイト - 全国のイベント情報とスタンプ獲得',
+  title: {
+    default: 'CNPトレカ交流会 | 全国のCNPトレーディングカード交流会情報',
+    template: '%s | CNPトレカ交流会'
+  },
+  description: '全国のCNPトレーディングカード交流会の最新情報をまとめて確認。X認証で簡単参加！リアルタイム参加者表示でコミュニティの輪を広げよう。',
+  keywords: ['CNP', 'CNPトレカ', 'トレーディングカード', '交流会', 'イベント', 'カードゲーム', 'コミュニティ'],
+  authors: [{ name: 'CNPトレカ交流会運営' }],
+  creator: 'CNPトレカ交流会運営',
+  publisher: 'CNPトレカ交流会運営',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://cnp-tcg-events-lp-production.up.railway.app'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'ja_JP',
+    url: 'https://cnp-tcg-events-lp-production.up.railway.app',
+    siteName: 'CNPトレカ交流会',
+    title: 'CNPトレカ交流会 | 全国のCNPトレーディングカード交流会情報',
+    description: '全国のCNPトレーディングカード交流会の最新情報をまとめて確認。X認証で簡単参加！リアルタイム参加者表示でコミュニティの輪を広げよう。',
+    images: [
+      {
+        url: 'https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A',
+        width: 1200,
+        height: 630,
+        alt: 'CNPトレカ交流会 - 全国のイベント情報をお届け',
+        type: 'image/png',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@cnp_ninjadao',
+    creator: '@cnp_ninjadao',
+    title: 'CNPトレカ交流会 | 全国のCNPトレーディングカード交流会情報',
+    description: '全国のCNPトレーディングカード交流会の最新情報をまとめて確認。X認証で簡単参加！リアルタイム参加者表示でコミュニティの輪を広げよう。',
+    images: ['https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'google-site-verification-code',
+  },
 }
 
 export default function RootLayout({

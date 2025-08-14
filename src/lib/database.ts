@@ -16,25 +16,27 @@ let mockData = {
   participations: [] as Participation[]
 };
 
-// テストデータの初期化
-if (isLocalDev && typeof window === 'undefined') {
-  // サーバーサイドでテストデータを同期的に初期化
+// 永続化データの初期化（全環境対応）
+if (typeof window === 'undefined') {
+  // サーバーサイドで永続化データを同期的に初期化
   try {
     const { generateTestUsers, generateTestEventMasters, generateTestEvents } = require('./mock-data');
     
-    // 本番リリース用：空の状態で初期化
-    mockData.users = [];
-    mockData.event_masters = [];
-    mockData.events = [];
+    // 永続化イベントデータを読み込み（開発・本番両環境）
+    mockData.users = generateTestUsers();
+    mockData.event_masters = generateTestEventMasters();
+    mockData.events = generateTestEvents();
     mockData.participants = [];
+    mockData.participations = [];
     
-    console.log('🎯 テストデータを読み込みました');
+    const environment = isProduction ? '本番環境' : '開発環境';
+    console.log(`🎯 ${environment} - 永続化イベントデータを読み込みました`);
     console.log(`- ユーザー: ${mockData.users.length}人`);
     console.log(`- イベントマスター: ${mockData.event_masters.length}件`);
     console.log(`- 現在のイベント: ${mockData.events.length}件`);
     console.log(`- 参加者: ${mockData.participants.length}件`);
   } catch (error) {
-    console.log('テストデータの読み込みをスキップ:', error.message);
+    console.log('永続化データの読み込みエラー:', error.message);
   }
 }
 
@@ -196,6 +198,38 @@ if (isLocalDev) {
           return Promise.resolve({ rowCount });
         }
         
+        // UPDATE operations
+        if (sql.includes('UPDATE events') && sql.includes('WHERE id = $1')) {
+          const [id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url] = params || [];
+          console.log('🔧 モックSQL: イベント更新 - ID:', id);
+          
+          const eventIndex = mockData.events.findIndex(e => e.id === id);
+          console.log('🔧 モックSQL: イベントインデックス:', eventIndex);
+          
+          if (eventIndex !== -1) {
+            mockData.events[eventIndex] = {
+              ...mockData.events[eventIndex],
+              name: name,
+              event_date: event_date,
+              start_time: start_time,
+              end_time: end_time,
+              organizer: organizer,
+              area: area,
+              prefecture: prefecture,
+              venue_name: venue_name,
+              address: address,
+              url: url,
+              description: description,
+              announcement_url: announcement_url
+            };
+            console.log('🔧 モックSQL: イベント更新完了:', mockData.events[eventIndex].name);
+            return Promise.resolve({ rows: [mockData.events[eventIndex]] });
+          } else {
+            console.log('🔧 モックSQL: イベントが見つかりません');
+            return Promise.resolve({ rows: [] });
+          }
+        }
+        
         return Promise.resolve({ rows: [] });
       },
       release: () => Promise.resolve()
@@ -291,7 +325,8 @@ export const initDatabase = async () => {
           user_x_id TEXT NOT NULL REFERENCES users(x_id),
           participated_at TIMESTAMPTZ DEFAULT NOW(),
           is_cancelled BOOLEAN DEFAULT FALSE,
-          cancelled_at TIMESTAMPTZ NULL
+          cancelled_at TIMESTAMPTZ NULL,
+          UNIQUE(event_master_id, user_x_id)
         )
       `);
       
@@ -310,16 +345,75 @@ export const initDatabase = async () => {
       
       console.log('Database initialized successfully');
       
-      // 本番環境または初回起動時にイベントデータが空の場合、サンプルデータを追加
-      const eventCount = await client.query('SELECT COUNT(*) FROM events');
-      const currentEventCount = parseInt(eventCount.rows[0].count);
-      
-      // 本番リリース用：サンプルデータは追加しない
+      // 永続化データをPostgreSQLに自動挿入
+      try {
+        const { generateTestEventMasters, generateTestEvents } = require('./mock-data');
+        const eventMasters = generateTestEventMasters();
+        const events = generateTestEvents();
+        
+        // event_mastersテーブルに永続化データを挿入
+        for (const eventMaster of eventMasters) {
+          await client.query(`
+            INSERT INTO event_masters (id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url, is_active)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            ON CONFLICT (id) DO UPDATE SET
+              name = EXCLUDED.name,
+              event_date = EXCLUDED.event_date,
+              start_time = EXCLUDED.start_time,
+              end_time = EXCLUDED.end_time,
+              organizer = EXCLUDED.organizer,
+              area = EXCLUDED.area,
+              prefecture = EXCLUDED.prefecture,
+              venue_name = EXCLUDED.venue_name,
+              address = EXCLUDED.address,
+              url = EXCLUDED.url,
+              description = EXCLUDED.description,
+              announcement_url = EXCLUDED.announcement_url,
+              updated_at = NOW()
+          `, [
+            eventMaster.id, eventMaster.name, eventMaster.event_date, eventMaster.start_time,
+            eventMaster.end_time, eventMaster.organizer, eventMaster.area, eventMaster.prefecture,
+            eventMaster.venue_name, eventMaster.address, eventMaster.url, eventMaster.description,
+            eventMaster.announcement_url, eventMaster.is_active
+          ]);
+        }
+        
+        // eventsテーブルに運用データを挿入
+        for (const event of events) {
+          await client.query(`
+            INSERT INTO events (id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            ON CONFLICT (id) DO UPDATE SET
+              name = EXCLUDED.name,
+              event_date = EXCLUDED.event_date,
+              start_time = EXCLUDED.start_time,
+              end_time = EXCLUDED.end_time,
+              organizer = EXCLUDED.organizer,
+              area = EXCLUDED.area,
+              prefecture = EXCLUDED.prefecture,
+              venue_name = EXCLUDED.venue_name,
+              address = EXCLUDED.address,
+              url = EXCLUDED.url,
+              description = EXCLUDED.description,
+              announcement_url = EXCLUDED.announcement_url
+          `, [
+            event.id, event.name, event.event_date, event.start_time,
+            event.end_time, event.organizer, event.area, event.prefecture,
+            event.venue_name, event.address, event.url, event.description,
+            event.announcement_url
+          ]);
+        }
+        
+        console.log(`✅ 永続化データをPostgreSQLに自動挿入: Events ${events.length}件, Masters ${eventMasters.length}件`);
+      } catch (error) {
+        console.log('永続化データの挿入をスキップ:', error.message);
+      }
       
       // デバッグ用：現在のイベント数とparticipants数を確認
       const eventCountResult = await client.query('SELECT COUNT(*) FROM events');
       const participantCountResult = await client.query('SELECT COUNT(*) FROM participants');
-      console.log(`Database status - Events: ${eventCountResult.rows[0].count}, Participants: ${participantCountResult.rows[0].count}`);
+      const eventMasterCountResult = await client.query('SELECT COUNT(*) FROM event_masters');
+      console.log(`Database status - Events: ${eventCountResult.rows[0].count}, Participants: ${participantCountResult.rows[0].count}, Event Masters: ${eventMasterCountResult.rows[0].count}`);
     } finally {
       client.release();
     }
@@ -393,21 +487,54 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       address: data.address,
       url: data.url,
       description: data.description,
+      announcement_url: data.announcement_url || null,
       created_at: new Date().toISOString()
     };
+    
+    // 現在のイベントテーブルに追加
     mockData.events.push(newEvent);
-    console.log('Mock event added. Total mock events:', mockData.events.length);
+    
+    // 永続化テーブル（event_masters）にも追加
+    const eventMaster = {
+      id: newEvent.id,
+      name: data.name,
+      event_date: data.event_date,
+      start_time: data.start_time,
+      end_time: data.end_time,
+      organizer: data.organizer,
+      area: data.area,
+      prefecture: data.prefecture,
+      venue_name: data.venue_name,
+      address: data.address,
+      url: data.url,
+      description: data.description,
+      announcement_url: data.announcement_url || null,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    mockData.event_masters.push(eventMaster);
+    
+    console.log('Mock event added. Total events:', mockData.events.length, ', Event masters:', mockData.event_masters.length);
     return newEvent;
   }
 
   try {
     const client = await pool.connect();
     try {
+      // 両方のテーブルに同時作成
       const result = await client.query(`
-        INSERT INTO events (name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        INSERT INTO events (name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING *
-      `, [data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description]);
+      `, [data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
+      
+      // event_mastersにも同時作成
+      await client.query(`
+        INSERT INTO event_masters (id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      `, [result.rows[0].id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
+      
       return result.rows[0];
     } finally {
       client.release();
@@ -428,10 +555,11 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       address: data.address,
       url: data.url,
       description: data.description,
+      announcement_url: data.announcement_url || null,
       created_at: new Date().toISOString()
     };
-    mockEvents.push(newEvent);
-    console.log('Mock event added after error. Total mock events:', mockEvents.length);
+    mockData.events.push(newEvent);
+    console.log('Mock event added after error. Total events:', mockData.events.length);
     return newEvent;
   }
 };
@@ -439,39 +567,72 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
 export const updateEvent = async (id: string, data: CreateEventData): Promise<Event | null> => {
   if (!pool) {
     console.warn('Database not configured, updating mock data');
-    const eventIndex = mockEvents.findIndex(event => event.id === id);
+    console.log('🔧 イベント更新 - 検索ID:', id);
+    console.log('🔧 現在のmockData.events:', mockData.events.map(e => ({ id: e.id, name: e.name })));
+    
+    const eventIndex = mockData.events.findIndex(event => event.id === id);
+    console.log('🔧 見つかったイベントインデックス:', eventIndex);
+    
     if (eventIndex !== -1) {
-      mockEvents[eventIndex] = {
-        ...mockEvents[eventIndex],
-        ...data
+      // イベントデータを更新
+      mockData.events[eventIndex] = {
+        ...mockData.events[eventIndex],
+        ...data,
+        // announcement_url フィールドが欠けている場合のデフォルト値
+        announcement_url: data.announcement_url || mockData.events[eventIndex].announcement_url || null
       };
-      return mockEvents[eventIndex];
+      
+      // 永続化テーブル（event_masters）も更新
+      const masterIndex = mockData.event_masters.findIndex(em => em.id === id);
+      if (masterIndex !== -1) {
+        mockData.event_masters[masterIndex] = {
+          ...mockData.event_masters[masterIndex],
+          ...data,
+          announcement_url: data.announcement_url || mockData.event_masters[masterIndex].announcement_url || null,
+          updated_at: new Date().toISOString()
+        };
+        console.log('🔧 イベントマスターも更新完了:', mockData.event_masters[masterIndex].name);
+      }
+      
+      console.log('🔧 イベント更新完了:', mockData.events[eventIndex].name);
+      return mockData.events[eventIndex];
     }
+    console.log('🔧 イベントが見つかりません');
     return null;
   }
 
   try {
     const client = await pool.connect();
     try {
+      // eventsテーブルを更新
       const result = await client.query(`
         UPDATE events 
-        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12
+        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12, announcement_url = $13
         WHERE id = $1
         RETURNING *
-      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description]);
+      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
+      
+      // 永続化テーブル（event_masters）も同時更新
+      await client.query(`
+        UPDATE event_masters 
+        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12, announcement_url = $13, updated_at = NOW()
+        WHERE id = $1
+      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
+      
       return result.rows[0] || null;
     } finally {
       client.release();
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    const eventIndex = mockEvents.findIndex(event => event.id === id);
+    // エラー時もmockData.eventsを使用
+    const eventIndex = mockData.events.findIndex(event => event.id === id);
     if (eventIndex !== -1) {
-      mockEvents[eventIndex] = {
-        ...mockEvents[eventIndex],
+      mockData.events[eventIndex] = {
+        ...mockData.events[eventIndex],
         ...data
       };
-      return mockEvents[eventIndex];
+      return mockData.events[eventIndex];
     }
     return null;
   }
@@ -761,6 +922,23 @@ export const joinEvent = async (eventId: string, userData: {
       created_at: new Date().toISOString()
     };
     mockData.participants.push(participant);
+    
+    // 永続化テーブル（participations）にも記録
+    // イベントマスターIDを取得（モックでは同じIDを使用）
+    const eventMaster = mockData.event_masters.find(em => em.id === eventId);
+    if (eventMaster) {
+      const participation = {
+        id: generateId(),
+        event_master_id: eventMaster.id,
+        user_x_id: userData.user_x_id,
+        participated_at: new Date().toISOString(),
+        is_cancelled: false,
+        cancelled_at: null
+      };
+      mockData.participations.push(participation);
+      console.log('Mock participation history added:', participation.id);
+    }
+    
     console.log('Mock participant added:', participant.id);
     console.log('Total mock participants:', mockData.participants.length);
     return true;
@@ -808,7 +986,16 @@ export const joinEvent = async (eventId: string, userData: {
         RETURNING id
       `, [eventId, userData.user_x_id, userData.user_x_name, userData.user_x_icon_url]);
       
+      // 永続化テーブル（participations）にも記録
+      // イベントマスターIDを取得（通常は同じIDを使用）
+      await client.query(`
+        INSERT INTO participations (event_master_id, user_x_id)
+        VALUES ($1, $2)
+        ON CONFLICT (event_master_id, user_x_id) DO NOTHING
+      `, [eventId, userData.user_x_id]);
+      
       console.log('PostgreSQL: Participant added with ID:', insertResult.rows[0].id);
+      console.log('PostgreSQL: Participation history also recorded');
       return true;
     } finally {
       client.release();

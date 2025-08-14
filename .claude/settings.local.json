@@ -34,8 +34,10 @@
       "WebFetch(domain:cnp-trading-card-event-calendar.up.railway.app)",
       "Bash(npm:*)",
       "WebFetch(domain:cnp-tcg-events-lp-production.up.railway.app)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(set NODE_OPTIONS=--max-old-space-size=4096)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }
