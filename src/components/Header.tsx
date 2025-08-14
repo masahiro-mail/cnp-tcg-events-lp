@@ -23,7 +23,7 @@ export default function Header() {
               ホーム
             </Link>
             <a 
-              href="https://cnptcg.monolithos.co.jp" 
+              href="https://www.cnp-tradingcard.com/official-info.html" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-600 hover:text-cnp-blue transition-colors"
