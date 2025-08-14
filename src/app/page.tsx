@@ -25,7 +25,7 @@ export default async function HomePage() {
           <div className="flex justify-center">
             <TwitterPostButton 
               text="今後のCNPトレカ交流会、イベントの情報はこちら！みんなでCNPトレカで交流しましょう🔥 #CNP #CNPトレカ #交流会"
-              url="https://www.event.cnp-traingcard.com"
+              url="https://cnp-tcg-events-lp-production.up.railway.app"
               hashtags={[]}
             />
           </div>

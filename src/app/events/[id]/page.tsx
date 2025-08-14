@@ -189,7 +189,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               <ParticipateButton eventId={params.id} />
               <TwitterPostButton 
                 text={`${event.name}開催決定🎉詳細は以下のURLよりご確認下さい😊 #CNP #CNPトレカ #交流会 #${event.area}`}
-                url={`https://www.event.cnp-traingcard.com/${params.id}`}
+                url={`https://cnp-tcg-events-lp-production.up.railway.app/events/${params.id}`}
                 hashtags={[]}
               />
             </div>

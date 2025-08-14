@@ -23,12 +23,12 @@ export default function Header() {
               ホーム
             </Link>
             <a 
-              href="https://www.cnp-tradingcard.com/" 
+              href="https://cnptcg.monolithos.co.jp" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-600 hover:text-cnp-blue transition-colors"
             >
-              CNPトレカファンサイト
+              公式情報
             </a>
             {session && session.user?.username === 'Diagram_Wolf' && (
               <Link href="/admin" className="text-gray-600 hover:text-cnp-blue transition-colors">
