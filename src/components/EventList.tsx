@@ -6,6 +6,7 @@ import Link from 'next/link'
 
 interface EventListProps {
   events: Event[]
+  selectedDate?: string | null
 }
 
 const AREAS = [
@@ -17,25 +18,69 @@ const AREAS = [
   '近畿',
   '中国',
   '四国',
-  '九州・沖縄'
+  '九州・沖縄',
+  'その他'
 ]
 
-export default function EventList({ events }: EventListProps) {
+type TimeFilter = 'future' | 'past'
+
+export default function EventList({ events, selectedDate }: EventListProps) {
   const [selectedArea, setSelectedArea] = useState('全て')
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('future')
 
-  // 今日以降の未来のイベントのみフィルター
+  // 日付フィルタリング
   const today = new Date()
-  today.setHours(0, 0, 0, 0) // 時間を00:00:00に設定
+  today.setHours(0, 0, 0, 0)
   
-  const futureEvents = events.filter(event => {
-    const eventDate = new Date(event.event_date)
-    eventDate.setHours(0, 0, 0, 0)
-    return eventDate >= today
-  })
+  let dateFilteredEvents = events
+  
+  if (selectedDate) {
+    // カレンダーで特定の日付が選択されている場合
+    const selectedDateObj = new Date(selectedDate)
+    selectedDateObj.setHours(0, 0, 0, 0)
+    dateFilteredEvents = events.filter(event => {
+      const eventDate = new Date(event.event_date)
+      eventDate.setHours(0, 0, 0, 0)
+      return eventDate.getTime() === selectedDateObj.getTime()
+    })
+  } else {
+    // 今後/過去フィルター
+    if (timeFilter === 'future') {
+      dateFilteredEvents = events.filter(event => {
+        const eventDate = new Date(event.event_date)
+        eventDate.setHours(0, 0, 0, 0)
+        return eventDate >= today
+      })
+    } else {
+      dateFilteredEvents = events.filter(event => {
+        const eventDate = new Date(event.event_date)
+        eventDate.setHours(0, 0, 0, 0)
+        return eventDate < today
+      })
+    }
+  }
 
+  // エリアフィルタリング
   const filteredEvents = selectedArea === '全て' 
-    ? futureEvents 
-    : futureEvents.filter(event => event.area === selectedArea)
+    ? dateFilteredEvents 
+    : dateFilteredEvents.filter(event => event.area === selectedArea)
+  
+  // ソート（今後: 最近→未来順、過去: 最近→昔順）
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
+    const dateA = new Date(a.event_date).getTime()
+    const dateB = new Date(b.event_date).getTime()
+    
+    if (selectedDate) {
+      // 特定日付選択時は時間順
+      return dateA - dateB
+    } else if (timeFilter === 'future') {
+      // 今後: 最近→未来順
+      return dateA - dateB
+    } else {
+      // 過去: 最近→昔順（新しい日付が先）
+      return dateB - dateA
+    }
+  })
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
@@ -48,6 +93,37 @@ export default function EventList({ events }: EventListProps) {
 
   return (
     <div className="space-y-4">
+      {/* 今後/過去フィルター（特定日付選択時は非表示） */}
+      {!selectedDate && (
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setTimeFilter('future')}
+            className={`
+              px-4 py-2 rounded-lg text-sm font-medium transition-colors
+              ${timeFilter === 'future'
+                ? 'bg-cnp-blue text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }
+            `}
+          >
+            今後
+          </button>
+          <button
+            onClick={() => setTimeFilter('past')}
+            className={`
+              px-4 py-2 rounded-lg text-sm font-medium transition-colors
+              ${timeFilter === 'past'
+                ? 'bg-cnp-blue text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }
+            `}
+          >
+            過去
+          </button>
+        </div>
+      )}
+      
+      {/* エリアフィルター */}
       <div className="flex flex-wrap gap-2 mb-4">
         {AREAS.map((area) => (
           <button
@@ -65,17 +141,27 @@ export default function EventList({ events }: EventListProps) {
           </button>
         ))}
       </div>
+      
+      {/* 選択中の条件表示 */}
+      {(selectedDate || timeFilter !== 'future' || selectedArea !== '全て') && (
+        <div className="text-sm text-gray-600 mb-2">
+          表示中: 
+          {selectedDate ? ` ${formatDate(selectedDate)}の` : ` ${timeFilter === 'future' ? '今後' : '過去'}の`}
+          {selectedArea !== '全て' ? `${selectedArea}エリアの` : '全エリアの'}イベント
+        </div>
+      )}
 
       <div className="space-y-3 max-h-96 overflow-y-auto">
-        {filteredEvents.length === 0 ? (
+        {sortedEvents.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            {selectedArea === '全て' 
-              ? 'まだイベントが登録されていません' 
-              : `${selectedArea}エリアのイベントはありません`
+            {selectedDate ? `${formatDate(selectedDate)}にイベントはありません` :
+             selectedArea === '全て' 
+              ? `${timeFilter === 'future' ? '今後' : '過去'}のイベントがありません` 
+              : `${selectedArea}エリアの${timeFilter === 'future' ? '今後' : '過去'}のイベントはありません`
             }
           </div>
         ) : (
-          filteredEvents.map((event) => (
+          sortedEvents.map((event) => (
             <div
               key={event.id}
               className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"

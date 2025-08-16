@@ -13,6 +13,16 @@ export default function SignInPage() {
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
 
   useEffect(() => {
+    // URLパラメータでエラーをチェック
+    const urlParams = new URLSearchParams(window.location.search)
+    const error = urlParams.get('error')
+    
+    if (error) {
+      console.log('Auth error:', error)
+      // エラーの場合、一度URLをクリア
+      window.history.replaceState({}, '', '/auth/signin')
+    }
+    
     getSession().then((session) => {
       if (session) {
         router.push('/')

@@ -5,21 +5,15 @@ import { Event } from '@/types/database'
 
 interface EventCalendarProps {
   events: Event[]
+  selectedDate?: string | null
+  onDateSelect?: (date: string | null) => void
 }
 
-export default function EventCalendar({ events }: EventCalendarProps) {
-  const [selectedDate, setSelectedDate] = useState<string>('')
+export default function EventCalendar({ events, selectedDate, onDateSelect }: EventCalendarProps) {
+  const [internalSelectedDate, setInternalSelectedDate] = useState<string>('')
   const [currentMonth, setCurrentMonth] = useState(new Date())
   
-  // 今日以降の未来のイベントのみフィルター
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  
-  const futureEvents = events.filter(event => {
-    const eventDate = new Date(event.event_date)
-    eventDate.setHours(0, 0, 0, 0)
-    return eventDate >= today
-  })
+  // カレンダーには全てのイベントを表示（過去・未来問わず）
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()
@@ -39,7 +33,7 @@ export default function EventCalendar({ events }: EventCalendarProps) {
     // Current month's days
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-      const hasEvent = futureEvents.some(event => event.event_date === dateStr)
+      const hasEvent = events.some(event => event.event_date === dateStr)
       days.push({ day: day.toString(), isCurrentMonth: true, hasEvent, date: dateStr })
     }
     
@@ -55,11 +49,21 @@ export default function EventCalendar({ events }: EventCalendarProps) {
   }
 
   const getEventsForDate = (date: string) => {
-    return futureEvents.filter(event => event.event_date === date)
+    return events.filter(event => event.event_date === date)
   }
 
+  const handleDateClick = (date: string) => {
+    const newSelectedDate = selectedDate === date ? null : date
+    if (onDateSelect) {
+      onDateSelect(newSelectedDate)
+    } else {
+      setInternalSelectedDate(newSelectedDate || '')
+    }
+  }
+
+  const currentSelectedDate = selectedDate || internalSelectedDate
   const days = getDaysInMonth(currentMonth)
-  const selectedEvents = selectedDate ? getEventsForDate(selectedDate) : []
+  const selectedEvents = currentSelectedDate ? getEventsForDate(currentSelectedDate) : []
 
   return (
     <div className="space-y-4">
@@ -91,12 +95,12 @@ export default function EventCalendar({ events }: EventCalendarProps) {
         {days.map((day, index) => (
           <button
             key={index}
-            onClick={() => day.date && setSelectedDate(day.date)}
+            onClick={() => day.date && handleDateClick(day.date)}
             className={`
               p-2 text-sm rounded-lg transition-colors relative
               ${!day.isCurrentMonth ? 'text-gray-300' : 'text-gray-700'}
               ${day.hasEvent ? 'bg-cnp-blue text-white font-medium' : 'hover:bg-gray-100'}
-              ${selectedDate === day.date ? 'ring-2 ring-cnp-orange' : ''}
+              ${currentSelectedDate === day.date ? 'ring-2 ring-cnp-orange' : ''}
             `}
             disabled={!day.isCurrentMonth}
           >
@@ -108,10 +112,10 @@ export default function EventCalendar({ events }: EventCalendarProps) {
         ))}
       </div>
 
-      {selectedDate && selectedEvents.length > 0 && (
+      {currentSelectedDate && selectedEvents.length > 0 && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-medium text-gray-900 mb-2">
-            {selectedDate} のイベント
+            {currentSelectedDate} のイベント
           </h4>
           <div className="space-y-2">
             {selectedEvents.map((event) => (

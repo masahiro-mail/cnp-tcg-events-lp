@@ -85,7 +85,6 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
-    error: '/auth/signin', // エラー時もログインページにリダイレクト
   },
   session: {
     strategy: 'jwt',

@@ -1,14 +1,34 @@
-import { Suspense } from 'react'
+'use client'
+
+import { useState, useEffect, Suspense } from 'react'
 import Header from '@/components/Header'
 import EventCalendar from '@/components/EventCalendar'
 import EventList from '@/components/EventList'
 import TwitterPostButton from '@/components/TwitterPostButton'
-import { getEvents } from '@/lib/database'
+import { Event } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
 
-export default async function HomePage() {
-  const events = await getEvents()
+export default function HomePage() {
+  const [events, setEvents] = useState<Event[]>([])
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('/api/events')
+        const data = await response.json()
+        setEvents(data)
+      } catch (error) {
+        console.error('Error fetching events:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchEvents()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -34,16 +54,27 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           <div className="cnp-card p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">📅 イベントカレンダー</h2>
-            <Suspense fallback={<div className="animate-pulse h-64 bg-gray-200 rounded"></div>}>
-              <EventCalendar events={events} />
-            </Suspense>
+            {loading ? (
+              <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
+            ) : (
+              <EventCalendar 
+                events={events} 
+                selectedDate={selectedDate}
+                onDateSelect={setSelectedDate}
+              />
+            )}
           </div>
 
           <div className="cnp-card p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">🗾 全国エリア別スケジュール</h2>
-            <Suspense fallback={<div className="animate-pulse h-64 bg-gray-200 rounded"></div>}>
-              <EventList events={events} />
-            </Suspense>
+            {loading ? (
+              <div className="animate-pulse h-64 bg-gray-200 rounded"></div>
+            ) : (
+              <EventList 
+                events={events} 
+                selectedDate={selectedDate}
+              />
+            )}
           </div>
         </div>
 
