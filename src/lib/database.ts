@@ -1035,17 +1035,21 @@ export const joinEvent = async (eventId: string, userData: {
       console.log('Mock participation history added:', participation.id);
     }
     
-    // ファイルストレージに保存（永続化）
-    if (databaseUrl?.includes('.json')) {
-      fileStorage.save({
-        users: mockData.users,
-        events: mockData.events,
-        participants: mockData.participants,
-        event_masters: mockData.event_masters,
-        participations: mockData.participations,
-        lastUpdated: new Date().toISOString()
-      });
-      console.log('💾 参加者データをファイルストレージに永続化しました');
+    // ファイルストレージに保存（永続化）- 本番環境でも常に実行
+    if (typeof window === 'undefined') {
+      try {
+        fileStorage.save({
+          users: mockData.users,
+          events: mockData.events,
+          participants: mockData.participants,
+          event_masters: mockData.event_masters,
+          participations: mockData.participations,
+          lastUpdated: new Date().toISOString()
+        });
+        console.log('💾 参加者データをファイルストレージに永続化しました');
+      } catch (error) {
+        console.error('❌ ファイルストレージ保存エラー:', error);
+      }
     }
     
     console.log('Mock participant added:', participant.id);
