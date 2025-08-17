@@ -7,6 +7,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  console.log('🔥 [API] participate POST endpoint called - Event ID:', params.id)
+  console.log('🔥 [API] Request headers:', Object.fromEntries(request.headers.entries()))
+  
   try {
     const session = await getServerSession(authOptions)
     
