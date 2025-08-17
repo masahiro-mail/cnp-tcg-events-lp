@@ -13,13 +13,27 @@ const providers = [
       params: {
         scope: "users.read"
       }
-    }
+    },
+    checks: ["state"],
+    protection: "state"
   })
 ];
 
 export const authOptions: NextAuthOptions = {
   providers,
   debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET,
+  cookies: {
+    pkceCodeVerifier: {
+      name: "next-auth.pkce.code_verifier",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === 'production'
+      }
+    }
+  },
   logger: {
     error: (code, metadata) => {
       console.error('[NextAuth Error]', code, metadata)

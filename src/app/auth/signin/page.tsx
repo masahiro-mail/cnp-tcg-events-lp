@@ -36,19 +36,31 @@ export default function SignInPage() {
     setError(null)
     
     try {
+      // より堅牢な認証フロー
       const result = await signIn('twitter', { 
-        callbackUrl: '/',
-        redirect: false 
+        callbackUrl: window.location.origin,
+        redirect: true 
       })
       
+      // redirect: true の場合、成功時は自動的にリダイレクトされる
+      // エラーの場合のみここに到達
       if (result?.error) {
-        setError('認証に失敗しました。もう一度お試しください。')
-      } else if (result?.url) {
-        window.location.href = result.url
+        console.error('NextAuth error:', result.error)
+        let errorMessage = '認証に失敗しました。'
+        
+        if (result.error === 'OAuthSignin') {
+          errorMessage = 'X認証でエラーが発生しました。しばらく待ってから再度お試しください。'
+        } else if (result.error === 'OAuthCallback') {
+          errorMessage = 'X認証のコールバックでエラーが発生しました。'
+        } else if (result.error === 'AccessDenied') {
+          errorMessage = 'アクセスが拒否されました。認証を許可してください。'
+        }
+        
+        setError(errorMessage)
       }
     } catch (error) {
       console.error('Sign in error:', error)
-      setError('認証に失敗しました。もう一度お試しください。')
+      setError('ネットワークエラーが発生しました。インターネット接続を確認してから再度お試しください。')
     } finally {
       setIsLoading(false)
     }
