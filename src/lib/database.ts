@@ -745,7 +745,23 @@ export const deleteEvent = async (id: string): Promise<boolean> => {
 };
 
 export const getParticipantsByEventId = async (eventId: string): Promise<Participant[]> => {
-  // 強制的にモックデータを使用（PostgreSQL接続問題対策）
+  // PostgreSQL優先、失敗時のみフォールバック
+  if (pool) {
+    try {
+      const client = await pool.connect();
+      try {
+        const result = await client.query('SELECT * FROM participants WHERE event_id = $1 ORDER BY created_at ASC', [eventId]);
+        console.log(`✅ PostgreSQL参加者取得成功: ${result.rows.length}件`);
+        return result.rows;
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error('❌ PostgreSQL参加者取得エラー、フォールバックに切り替え:', error);
+    }
+  }
+  
+  // PostgreSQL失敗時のフォールバック
   console.warn(`🚨 Using mock data for participants retrieval (PostgreSQL fallback) - Event: ${eventId}`);
   
   const participants = mockData.participants.filter(p => p.event_id === eventId).sort((a, b) => 
@@ -897,7 +913,38 @@ export const createParticipation = async (eventMasterId: string, userXId: string
 };
 
 export const createParticipant = async (data: CreateParticipantData): Promise<Participant | null> => {
-  // 強制的にモックデータを使用（PostgreSQL接続問題対策）
+  console.log('🔍 [DEBUG] createParticipant called with:', data);
+  console.log('🔍 [DEBUG] pool状態:', pool ? 'プール存在' : 'プールなし');
+  console.log('🔍 [DEBUG] DATABASE_URL:', process.env.DATABASE_URL?.substring(0, 20) + '...');
+  
+  // PostgreSQL優先、失敗時のみフォールバック
+  if (pool) {
+    try {
+      const client = await pool.connect();
+      try {
+        const result = await client.query(`
+          INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
+          VALUES ($1, $2, $3, $4)
+          RETURNING *
+        `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
+        
+        console.log('✅ PostgreSQL参加者保存成功:', result.rows[0]);
+        return result.rows[0];
+      } catch (dbError: any) {
+        if (dbError.code === '23505') {
+          console.log('❌ PostgreSQL: 既に参加済み');
+          return null;
+        }
+        throw dbError;
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error('❌ PostgreSQL接続エラー、フォールバックに切り替え:', error);
+    }
+  }
+  
+  // PostgreSQL失敗時のフォールバック
   console.warn('🚨 Using mock data for participant creation (PostgreSQL fallback)');
   
   // 重複チェック
