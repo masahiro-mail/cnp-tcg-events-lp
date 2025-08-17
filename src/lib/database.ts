@@ -917,7 +917,17 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
   console.log('🔍 [DEBUG] pool状態:', pool ? 'プール存在' : 'プールなし');
   console.log('🔍 [DEBUG] DATABASE_URL:', process.env.DATABASE_URL?.substring(0, 20) + '...');
   
-  // PostgreSQL優先、失敗時のみフォールバック
+  // 新しい参加者オブジェクトを作成（共通処理）
+  const newParticipant: Participant = {
+    id: 'persistent-participant-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+    event_id: data.event_id,
+    user_x_id: data.user_x_id,
+    user_x_name: data.user_x_name,
+    user_x_icon_url: data.user_x_icon_url,
+    created_at: new Date().toISOString()
+  };
+  
+  // PostgreSQL処理（本番環境）
   if (pool) {
     try {
       const client = await pool.connect();
@@ -929,6 +939,28 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
         `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
         
         console.log('✅ PostgreSQL参加者保存成功:', result.rows[0]);
+        
+        // PostgreSQL成功時でも、必ずフォールバック保存を実行
+        console.log('🔥 [DEBUG] PostgreSQL成功 - フォールバック保存も実行');
+        mockData.participants.push(newParticipant);
+        
+        // 強制的にファイルストレージに保存（サーバーサイドでのみ）
+        if (typeof window === 'undefined') {
+          try {
+            fileStorage.save({
+              users: mockData.users,
+              events: mockData.events,
+              participants: mockData.participants,
+              event_masters: mockData.event_masters,
+              participations: mockData.participations,
+              lastUpdated: new Date().toISOString()
+            });
+            console.log('✅ PostgreSQL + File storage backup saved successfully');
+          } catch (error) {
+            console.error('❌ Failed to save file storage backup:', error);
+          }
+        }
+        
         return result.rows[0];
       } catch (dbError: any) {
         if (dbError.code === '23505') {
@@ -941,43 +973,42 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
       }
     } catch (error) {
       console.error('❌ PostgreSQL接続エラー、フォールバックに切り替え:', error);
+      // PostgreSQL失敗時はフォールバック処理を継続
     }
   }
   
-  // PostgreSQL失敗時のフォールバック
-  console.warn('🚨 Using mock data for participant creation (PostgreSQL fallback)');
+  // フォールバック処理（開発環境 OR PostgreSQL失敗時）
+  console.warn('🚨 Using file storage for participant creation (fallback mode)');
   
   // 重複チェック
   const existingParticipant = mockData.participants.find(
     p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
   );
   if (existingParticipant) {
-    console.log('Participant already exists in mock data');
+    console.log('❌ Participant already exists in mock data');
     return null;
   }
   
-  const newParticipant: Participant = {
-    id: 'persistent-participant-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-    event_id: data.event_id,
-    user_x_id: data.user_x_id,
-    user_x_name: data.user_x_name,
-    user_x_icon_url: data.user_x_icon_url,
-    created_at: new Date().toISOString()
-  };
-  
   mockData.participants.push(newParticipant);
   
-  // 強制的にファイルストレージに保存
+  // 強制的にファイルストレージに保存（サーバーサイドでのみ）
   if (typeof window === 'undefined') {
     try {
-      fileStorage.save(mockData);
-      console.log('✅ Participant saved to file storage successfully');
+      fileStorage.save({
+        users: mockData.users,
+        events: mockData.events,
+        participants: mockData.participants,
+        event_masters: mockData.event_masters,
+        participations: mockData.participations,
+        lastUpdated: new Date().toISOString()
+      });
+      console.log('✅ Fallback participant saved to file storage successfully');
     } catch (error) {
       console.error('❌ Failed to save to file storage:', error);
     }
   }
   
-  console.log(`✅ Mock participant added: ${data.user_x_name}. Total: ${mockData.participants.length}`);
+  console.log(`✅ Fallback participant added: ${data.user_x_name}. Total: ${mockData.participants.length}`);
   return newParticipant;
 };
 
@@ -987,6 +1018,33 @@ export const joinEvent = async (eventId: string, userData: {
   user_x_name: string;
   user_x_icon_url: string;
 }): Promise<boolean> => {
+  console.log('🔥 [joinEvent] Called with:', { eventId, userData });
+  console.log('🔥 [joinEvent] pool状態:', pool ? 'プール存在' : 'プールなし');
+  
+  // PostgreSQL優先、失敗時のみフォールバック
+  if (pool) {
+    try {
+      console.log('🔥 [joinEvent] PostgreSQL処理を試行');
+      // createParticipant を直接呼び出し
+      const participant = await createParticipant({
+        event_id: eventId,
+        user_x_id: userData.user_x_id,
+        user_x_name: userData.user_x_name,
+        user_x_icon_url: userData.user_x_icon_url
+      });
+      
+      if (participant) {
+        console.log('✅ [joinEvent] PostgreSQL/Fallback参加登録成功');
+        return true;
+      } else {
+        console.log('❌ [joinEvent] 既に参加済み');
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ [joinEvent] PostgreSQL処理エラー:', error);
+      return false;
+    }
+  }
   
   if (!pool) {
     console.warn('Database not configured, using mock data for joinEvent');
