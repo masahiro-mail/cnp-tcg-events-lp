@@ -40,18 +40,27 @@ export default function ParticipateButton({ eventId, onParticipationChange }: Pa
   const handleParticipate = async (action: 'join' | 'leave') => {
     if (!session?.user || loading) return
 
+    console.log(`🚀 [FRONTEND] 参加処理開始 - Action: ${action}, Event: ${eventId}, User: ${session.user.name}`)
+    
     setLoading(true)
     try {
+      const requestBody = { action }
+      console.log(`📤 [FRONTEND] APIリクエスト送信:`, requestBody)
+      
       const response = await fetch(`/api/events/${eventId}/participate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify(requestBody),
       })
+
+      console.log(`📥 [FRONTEND] APIレスポンス - Status: ${response.status}, OK: ${response.ok}`)
 
       if (response.ok) {
         const data = await response.json()
+        console.log(`✅ [FRONTEND] APIレスポンス成功:`, data)
+        
         setIsJoined(action === 'join')
         if (onParticipationChange) {
           onParticipationChange()
@@ -59,14 +68,14 @@ export default function ParticipateButton({ eventId, onParticipationChange }: Pa
         // グローバルイベントを発火して参加者リストを更新
         window.dispatchEvent(new Event('participationChanged'))
         // 成功メッセージを表示（オプション）
-        console.log(data.message)
+        console.log(`🎉 [FRONTEND] ${data.message}`)
       } else {
         const error = await response.json()
-        console.error('Error:', error.error)
+        console.error(`❌ [FRONTEND] APIエラー:`, error)
         alert(error.error)
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error(`💥 [FRONTEND] 通信エラー:`, error)
       alert('エラーが発生しました')
     } finally {
       setLoading(false)
