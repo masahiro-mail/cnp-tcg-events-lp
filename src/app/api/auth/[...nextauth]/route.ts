@@ -11,11 +11,12 @@ const providers = [
     authorization: {
       url: "https://twitter.com/i/oauth2/authorize",
       params: {
-        scope: "users.read"
+        scope: "users.read tweet.read",
+        response_type: "code"
       }
     },
-    checks: ["state"],
-    protection: "state"
+    checks: ["state", "pkce"],
+    protection: "pkce"
   })
 ];
 
