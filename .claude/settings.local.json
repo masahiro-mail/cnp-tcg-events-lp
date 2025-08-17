@@ -36,7 +36,9 @@
       "WebFetch(domain:cnp-tcg-events-lp-production.up.railway.app)",
       "Bash(curl:*)",
       "Bash(set NODE_OPTIONS=--max-old-space-size=4096)",
-      "WebFetch(domain:www.cnp-tradingcard.com)"
+      "WebFetch(domain:www.cnp-tradingcard.com)",
+      "Bash(npx tsx:*)",
+      "WebFetch(domain:event.cnp-tradingcard.com)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
