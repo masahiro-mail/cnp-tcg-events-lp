@@ -932,6 +932,17 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
     try {
       const client = await pool.connect();
       try {
+        // 事前に重複チェック
+        const existingCheck = await client.query(
+          'SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2',
+          [data.event_id, data.user_x_id]
+        );
+        
+        if (existingCheck.rows.length > 0) {
+          console.log('❌ PostgreSQL: 既に参加済み（事前チェック）');
+          return null;
+        }
+        
         const result = await client.query(`
           INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
           VALUES ($1, $2, $3, $4)
@@ -940,31 +951,39 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
         
         console.log('✅ PostgreSQL参加者保存成功:', result.rows[0]);
         
-        // PostgreSQL成功時でも、必ずフォールバック保存を実行
+        // PostgreSQL成功時でも、必ずフォールバック保存を実行（重複チェック付き）
         console.log('🔥 [DEBUG] PostgreSQL成功 - フォールバック保存も実行');
-        mockData.participants.push(newParticipant);
+        const existingInMock = mockData.participants.find(
+          p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
+        );
         
-        // 強制的にファイルストレージに保存（サーバーサイドでのみ）
-        if (typeof window === 'undefined') {
-          try {
-            fileStorage.save({
-              users: mockData.users,
-              events: mockData.events,
-              participants: mockData.participants,
-              event_masters: mockData.event_masters,
-              participations: mockData.participations,
-              lastUpdated: new Date().toISOString()
-            });
-            console.log('✅ PostgreSQL + File storage backup saved successfully');
-          } catch (error) {
-            console.error('❌ Failed to save file storage backup:', error);
+        if (!existingInMock) {
+          mockData.participants.push(newParticipant);
+          
+          // 強制的にファイルストレージに保存（サーバーサイドでのみ）
+          if (typeof window === 'undefined') {
+            try {
+              fileStorage.save({
+                users: mockData.users,
+                events: mockData.events,
+                participants: mockData.participants,
+                event_masters: mockData.event_masters,
+                participations: mockData.participations,
+                lastUpdated: new Date().toISOString()
+              });
+              console.log('✅ PostgreSQL + File storage backup saved successfully');
+            } catch (error) {
+              console.error('❌ Failed to save file storage backup:', error);
+            }
           }
+        } else {
+          console.log('🔥 [DEBUG] Mock data already contains this participant, skipping duplicate');
         }
         
         return result.rows[0];
       } catch (dbError: any) {
         if (dbError.code === '23505') {
-          console.log('❌ PostgreSQL: 既に参加済み');
+          console.log('❌ PostgreSQL: 既に参加済み（制約エラー）');
           return null;
         }
         throw dbError;
