@@ -45,7 +45,8 @@ export default function ParticipateButton({ eventId, onParticipationChange }: Pa
     setLoading(true)
     try {
       const requestBody = { action }
-      console.log(`📤 [FRONTEND] APIリクエスト送信:`, requestBody)
+      console.log(`📤 [FRONTEND] APIリクエスト送信:`)
+      console.log(JSON.stringify(requestBody, null, 2))
       
       const response = await fetch(`/api/events/${eventId}/participate`, {
         method: 'POST',
@@ -59,7 +60,8 @@ export default function ParticipateButton({ eventId, onParticipationChange }: Pa
 
       if (response.ok) {
         const data = await response.json()
-        console.log(`✅ [FRONTEND] APIレスポンス成功:`, data)
+        console.log(`✅ [FRONTEND] APIレスポンス成功:`)
+        console.log(JSON.stringify(data, null, 2))
         
         setIsJoined(action === 'join')
         if (onParticipationChange) {
