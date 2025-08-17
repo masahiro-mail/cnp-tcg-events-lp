@@ -28,7 +28,7 @@ export default function Header() {
               rel="noopener noreferrer"
               className="text-gray-600 hover:text-cnp-blue transition-colors"
             >
-              CNPトレカ攻略ファンサイト
+              CNPトレカファンサイト
             </a>
             {session && session.user?.username === 'Diagram_Wolf' && (
               <Link href="/admin" className="text-gray-600 hover:text-cnp-blue transition-colors">
