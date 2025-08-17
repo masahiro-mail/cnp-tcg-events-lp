@@ -28,29 +28,37 @@ export async function POST(
     if (action === 'join') {
       console.log(`🚀 [PARTICIPATE] 参加登録開始 - Event: ${eventId}, User: ${userName} (${userId})`)
       
-      const success = await joinEvent(eventId, {
-        user_x_id: userId,
-        user_x_name: userName,
-        user_x_icon_url: userImage
-      })
-      
-      if (!success) {
-        console.log(`❌ [PARTICIPATE] 参加登録失敗（既に参加済み） - Event: ${eventId}, User: ${userName}`)
-        return NextResponse.json({ error: '既に参加済みです' }, { status: 400 })
-      }
-      
-      console.log(`✅ [PARTICIPATE] 参加登録成功 - Event: ${eventId}, User: ${userName}`)
-      return NextResponse.json({ 
-        success: true, 
-        message: '参加しました',
-        debug: {
-          eventId,
-          userName,
-          userId,
-          apiCalled: true,
-          timestamp: new Date().toISOString()
+      try {
+        const success = await joinEvent(eventId, {
+          user_x_id: userId,
+          user_x_name: userName,
+          user_x_icon_url: userImage
+        })
+        
+        if (!success) {
+          console.log(`❌ [PARTICIPATE] 参加登録失敗（既に参加済み） - Event: ${eventId}, User: ${userName}`)
+          return NextResponse.json({ error: '既に参加済みです' }, { status: 400 })
         }
-      })
+        
+        console.log(`✅ [PARTICIPATE] 参加登録成功 - Event: ${eventId}, User: ${userName}`)
+        return NextResponse.json({ 
+          success: true, 
+          message: '参加しました',
+          debug: {
+            eventId,
+            userName,
+            userId,
+            apiCalled: true,
+            timestamp: new Date().toISOString()
+          }
+        })
+      } catch (joinError) {
+        console.error(`💥 [PARTICIPATE] 参加登録エラー - Event: ${eventId}, User: ${userName}`, joinError)
+        return NextResponse.json({ 
+          error: 'データベース接続エラーが発生しました。しばらく時間をおいて再度お試しください。',
+          details: joinError instanceof Error ? joinError.message : 'Unknown error'
+        }, { status: 500 })
+      }
     } else if (action === 'leave') {
       console.log(`🚀 [LEAVE] キャンセル処理開始 - Event: ${eventId}, User: ${userName} (${userId})`)
       

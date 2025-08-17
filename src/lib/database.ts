@@ -745,48 +745,30 @@ export const deleteEvent = async (id: string): Promise<boolean> => {
 };
 
 export const getParticipantsByEventId = async (eventId: string): Promise<Participant[]> => {
-  // PostgreSQL優先、失敗時のみフォールバック
-  if (pool) {
-    try {
-      const client = await pool.connect();
-      try {
-        const result = await client.query('SELECT * FROM participants WHERE event_id = $1 ORDER BY created_at ASC', [eventId]);
-        console.log(`✅ PostgreSQL参加者取得成功: ${result.rows.length}件`);
-        return result.rows;
-      } finally {
-        client.release();
-      }
-    } catch (error) {
-      console.error('❌ PostgreSQL参加者取得エラー、フォールバックに切り替え:', error);
-    }
+  if (!pool) {
+    console.error('❌ PostgreSQL pool not configured');
+    return [];
   }
-  
-  // PostgreSQL失敗時のフォールバック
-  console.warn(`🚨 Using mock data for participants retrieval (PostgreSQL fallback) - Event: ${eventId}`);
-  
-  const participants = mockData.participants.filter(p => p.event_id === eventId).sort((a, b) => 
-    new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-  );
-  
-  console.log(`📊 Found ${participants.length} participants for event ${eventId}`);
-  participants.forEach(p => {
-    console.log(`  - ${p.user_x_name} (${p.user_x_id}) joined at ${p.created_at}`);
-  });
-  
-  return participants;
+
+  try {
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM participants WHERE event_id = $1 ORDER BY created_at ASC', [eventId]);
+      console.log(`✅ PostgreSQL参加者取得成功: ${result.rows.length}件`);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('❌ PostgreSQL参加者取得エラー:', error);
+    return [];
+  }
 };
 
 export const getParticipantsByUserId = async (userId: string): Promise<Participant[]> => {
-  
   if (!pool) {
-    console.warn('Database not configured, returning mock participants');
-    // 統合されたmockData.participantsを使用
-    const filtered = mockData.participants.filter(p => p.user_x_id === userId);
-    console.log('Mock filtered participants:', filtered.length);
-    console.log('Mock participants data:', filtered);
-    return filtered.sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    console.error('❌ PostgreSQL pool not configured');
+    return [];
   }
 
   try {
@@ -802,9 +784,7 @@ export const getParticipantsByUserId = async (userId: string): Promise<Participa
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    return mockData.participants.filter(p => p.user_x_id === userId).sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    return [];
   }
 };
 
@@ -917,118 +897,49 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
   console.log('🔍 [DEBUG] pool状態:', pool ? 'プール存在' : 'プールなし');
   console.log('🔍 [DEBUG] DATABASE_URL:', process.env.DATABASE_URL?.substring(0, 20) + '...');
   
-  // 新しい参加者オブジェクトを作成（共通処理）
-  const newParticipant: Participant = {
-    id: 'persistent-participant-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-    event_id: data.event_id,
-    user_x_id: data.user_x_id,
-    user_x_name: data.user_x_name,
-    user_x_icon_url: data.user_x_icon_url,
-    created_at: new Date().toISOString()
-  };
-  
-  // PostgreSQL処理（本番環境）
-  if (pool) {
+  // PostgreSQL処理（本番環境・開発環境共通）
+  if (!pool) {
+    console.error('❌ PostgreSQL pool not configured');
+    throw new Error('Database not configured');
+  }
+
+  try {
+    const client = await pool.connect();
     try {
-      const client = await pool.connect();
-      try {
-        // 事前に重複チェック
-        const existingCheck = await client.query(
-          'SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2',
-          [data.event_id, data.user_x_id]
-        );
-        
-        if (existingCheck.rows.length > 0) {
-          console.log('❌ PostgreSQL: 既に参加済み（事前チェック）');
-          return null;
-        }
-        
-        const result = await client.query(`
-          INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
-          VALUES ($1, $2, $3, $4)
-          RETURNING *
-        `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
-        
-        console.log('✅ PostgreSQL参加者保存成功:', result.rows[0]);
-        
-        // PostgreSQL成功時でも、必ずフォールバック保存を実行（重複チェック付き）
-        console.log('🔥 [DEBUG] PostgreSQL成功 - フォールバック保存も実行');
-        const existingInMock = mockData.participants.find(
-          p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
-        );
-        
-        if (!existingInMock) {
-          mockData.participants.push(newParticipant);
-          
-          // 強制的にファイルストレージに保存（サーバーサイドでのみ）
-          if (typeof window === 'undefined') {
-            try {
-              fileStorage.save({
-                users: mockData.users,
-                events: mockData.events,
-                participants: mockData.participants,
-                event_masters: mockData.event_masters,
-                participations: mockData.participations,
-                lastUpdated: new Date().toISOString()
-              });
-              console.log('✅ PostgreSQL + File storage backup saved successfully');
-            } catch (error) {
-              console.error('❌ Failed to save file storage backup:', error);
-            }
-          }
-        } else {
-          console.log('🔥 [DEBUG] Mock data already contains this participant, skipping duplicate');
-        }
-        
-        return result.rows[0];
-      } catch (dbError: any) {
-        if (dbError.code === '23505') {
-          console.log('❌ PostgreSQL: 既に参加済み（制約エラー）');
-          return null;
-        }
-        throw dbError;
-      } finally {
-        client.release();
+      // 事前に重複チェック
+      const existingCheck = await client.query(
+        'SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2',
+        [data.event_id, data.user_x_id]
+      );
+      
+      if (existingCheck.rows.length > 0) {
+        console.log('❌ PostgreSQL: 既に参加済み（事前チェック）');
+        return null;
       }
-    } catch (error) {
-      console.error('❌ PostgreSQL接続エラー、フォールバックに切り替え:', error);
-      // PostgreSQL失敗時はフォールバック処理を継続
+      
+      // PostgreSQLに参加者データを挿入
+      const result = await client.query(`
+        INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+      `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
+      
+      console.log('✅ PostgreSQL参加者保存成功:', result.rows[0]);
+      return result.rows[0];
+      
+    } catch (dbError: any) {
+      if (dbError.code === '23505') {
+        console.log('❌ PostgreSQL: 既に参加済み（制約エラー）');
+        return null;
+      }
+      throw dbError;
+    } finally {
+      client.release();
     }
+  } catch (error) {
+    console.error('❌ PostgreSQL接続エラー:', error);
+    throw error;
   }
-  
-  // フォールバック処理（開発環境 OR PostgreSQL失敗時）
-  console.warn('🚨 Using file storage for participant creation (fallback mode)');
-  
-  // 重複チェック
-  const existingParticipant = mockData.participants.find(
-    p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
-  );
-  if (existingParticipant) {
-    console.log('❌ Participant already exists in mock data');
-    return null;
-  }
-  
-  mockData.participants.push(newParticipant);
-  
-  // 強制的にファイルストレージに保存（サーバーサイドでのみ）
-  if (typeof window === 'undefined') {
-    try {
-      fileStorage.save({
-        users: mockData.users,
-        events: mockData.events,
-        participants: mockData.participants,
-        event_masters: mockData.event_masters,
-        participations: mockData.participations,
-        lastUpdated: new Date().toISOString()
-      });
-      console.log('✅ Fallback participant saved to file storage successfully');
-    } catch (error) {
-      console.error('❌ Failed to save to file storage:', error);
-    }
-  }
-  
-  console.log(`✅ Fallback participant added: ${data.user_x_name}. Total: ${mockData.participants.length}`);
-  return newParticipant;
 };
 
 // イベント参加機能
