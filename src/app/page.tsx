@@ -37,14 +37,14 @@ export default function HomePage() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            CNPトレカ交流会
+            CNPトレカ イベントページ
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
-            全国のCNPトレーディングカード交流会情報をお届け。
+            全世界のCNPトレカのイベント情報をまとめています
           </p>
           <div className="flex justify-center">
             <TwitterPostButton 
-              text="今後のCNPトレカ交流会、イベントの情報はこちら！みんなでCNPトレカで交流しましょう🔥 #CNP #CNPトレカ #交流会"
+              text="今後のCNPトレカイベントの情報はこちら！みんなでCNPトレカで交流しましょう🔥 #CNP #CNPトレカ #イベント"
               url="https://cnp-tcg-events-lp-production.up.railway.app"
               hashtags={[]}
             />
