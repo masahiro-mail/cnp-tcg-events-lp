@@ -1021,158 +1021,25 @@ export const joinEvent = async (eventId: string, userData: {
   console.log('🔥 [joinEvent] Called with:', { eventId, userData });
   console.log('🔥 [joinEvent] pool状態:', pool ? 'プール存在' : 'プールなし');
   
-  // PostgreSQL優先、失敗時のみフォールバック
-  if (pool) {
-    try {
-      console.log('🔥 [joinEvent] PostgreSQL処理を試行');
-      // createParticipant を直接呼び出し
-      const participant = await createParticipant({
-        event_id: eventId,
-        user_x_id: userData.user_x_id,
-        user_x_name: userData.user_x_name,
-        user_x_icon_url: userData.user_x_icon_url
-      });
-      
-      if (participant) {
-        console.log('✅ [joinEvent] PostgreSQL/Fallback参加登録成功');
-        return true;
-      } else {
-        console.log('❌ [joinEvent] 既に参加済み');
-        return false;
-      }
-    } catch (error) {
-      console.error('❌ [joinEvent] PostgreSQL処理エラー:', error);
-      return false;
-    }
-  }
-  
-  if (!pool) {
-    console.warn('Database not configured, using mock data for joinEvent');
-    // ユーザー情報を永続化
-    await upsertUser({
-      x_id: userData.user_x_id,
-      x_name: userData.user_x_name,
-      x_username: userData.user_x_name,
-      x_icon_url: userData.user_x_icon_url
-    });
-    
-    // 既存参加チェック
-    const existingParticipant = mockData.participants.find(
-      p => p.event_id === eventId && p.user_x_id === userData.user_x_id
-    );
-    
-    if (existingParticipant) {
-      console.log('Mock: Already participating');
-      return false; // 既に参加済み
-    }
-    
-    // 参加者を追加
-    const participant = {
-      id: generateId(),
+  // 必ず createParticipant を呼び出す（すべての環境で統一）
+  try {
+    console.log('🔥 [joinEvent] createParticipant 処理を開始');
+    const participant = await createParticipant({
       event_id: eventId,
       user_x_id: userData.user_x_id,
       user_x_name: userData.user_x_name,
-      user_x_icon_url: userData.user_x_icon_url,
-      created_at: new Date().toISOString()
-    };
-    mockData.participants.push(participant);
+      user_x_icon_url: userData.user_x_icon_url
+    });
     
-    // 永続化テーブル（participations）にも記録
-    // イベントマスターIDを取得（モックでは同じIDを使用）
-    const eventMaster = mockData.event_masters.find(em => em.id === eventId);
-    if (eventMaster) {
-      const participation = {
-        id: generateId(),
-        event_master_id: eventMaster.id,
-        user_x_id: userData.user_x_id,
-        participated_at: new Date().toISOString(),
-        is_cancelled: false,
-        cancelled_at: null
-      };
-      mockData.participations.push(participation);
-      console.log('Mock participation history added:', participation.id);
-    }
-    
-    // ファイルストレージに保存（永続化）- 本番環境でも常に実行
-    if (typeof window === 'undefined') {
-      try {
-        fileStorage.save({
-          users: mockData.users,
-          events: mockData.events,
-          participants: mockData.participants,
-          event_masters: mockData.event_masters,
-          participations: mockData.participations,
-          lastUpdated: new Date().toISOString()
-        });
-        console.log('💾 参加者データをファイルストレージに永続化しました');
-      } catch (error) {
-        console.error('❌ ファイルストレージ保存エラー:', error);
-      }
-    }
-    
-    console.log('Mock participant added:', participant.id);
-    console.log('Total mock participants:', mockData.participants.length);
-    return true;
-  }
-
-  try {
-    const client = await pool.connect();
-    
-    try {
-      console.log('PostgreSQL: Connected to database');
-      
-      // イベント存在チェック（モックシステム経由）
-      const eventCheck = await client.query('SELECT id FROM events WHERE id = $1', [eventId]);
-      console.log('Event exists:', eventCheck.rows.length > 0);
-      if (eventCheck.rows.length === 0) {
-        console.error('Event not found:', eventId);
-        return false;
-      }
-      
-      // ユーザー情報を永続化
-      await upsertUser({
-        x_id: userData.user_x_id,
-        x_name: userData.user_x_name,
-        x_username: userData.user_x_name,
-        x_icon_url: userData.user_x_icon_url
-      });
-      console.log('User upserted successfully');
-      
-      // 既存参加チェック（モックシステム経由）
-      const existingResult = await client.query(
-        'SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2',
-        [eventId, userData.user_x_id]
-      );
-      console.log('Existing participants found:', existingResult.rows.length);
-      
-      if (existingResult.rows.length > 0) {
-        console.log('PostgreSQL: Already participating');
-        return false; // 既に参加済み
-      }
-      
-      // 参加者を追加（モックシステム経由）
-      const insertResult = await client.query(`
-        INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id
-      `, [eventId, userData.user_x_id, userData.user_x_name, userData.user_x_icon_url]);
-      
-      // 永続化テーブル（participations）にも記録
-      // イベントマスターIDを取得（通常は同じIDを使用）
-      await client.query(`
-        INSERT INTO participations (event_master_id, user_x_id)
-        VALUES ($1, $2)
-        ON CONFLICT (event_master_id, user_x_id) DO NOTHING
-      `, [eventId, userData.user_x_id]);
-      
-      console.log('PostgreSQL: Participant added with ID:', insertResult.rows[0].id);
-      console.log('PostgreSQL: Participation history also recorded');
+    if (participant) {
+      console.log('✅ [joinEvent] 参加登録成功:', participant.id);
       return true;
-    } finally {
-      client.release();
+    } else {
+      console.log('❌ [joinEvent] 既に参加済みまたは処理失敗');
+      return false;
     }
-  } catch (error: unknown) {
-    console.error('Error joining event:', error);
+  } catch (error) {
+    console.error('❌ [joinEvent] createParticipant処理エラー:', error);
     return false;
   }
 };
