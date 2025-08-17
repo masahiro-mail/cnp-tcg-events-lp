@@ -93,35 +93,38 @@ export default function EventList({ events, selectedDate }: EventListProps) {
 
   return (
     <div className="space-y-4">
-      {/* 今後/過去フィルター（特定日付選択時は非表示） */}
-      {!selectedDate && (
-        <div className="flex gap-2 mb-4">
-          <button
-            onClick={() => setTimeFilter('future')}
-            className={`
-              px-4 py-2 rounded-lg text-sm font-medium transition-colors
-              ${timeFilter === 'future'
-                ? 'bg-cnp-blue text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }
-            `}
-          >
-            今後
-          </button>
-          <button
-            onClick={() => setTimeFilter('past')}
-            className={`
-              px-4 py-2 rounded-lg text-sm font-medium transition-colors
-              ${timeFilter === 'past'
-                ? 'bg-cnp-blue text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }
-            `}
-          >
-            過去
-          </button>
-        </div>
-      )}
+      {/* 今後/過去フィルター（常に表示） */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setTimeFilter('future')}
+          className={`
+            px-4 py-2 rounded-lg text-sm font-medium transition-colors
+            ${timeFilter === 'future'
+              ? 'bg-cnp-blue text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }
+          `}
+        >
+          今後
+        </button>
+        <button
+          onClick={() => setTimeFilter('past')}
+          className={`
+            px-4 py-2 rounded-lg text-sm font-medium transition-colors
+            ${timeFilter === 'past'
+              ? 'bg-cnp-blue text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }
+          `}
+        >
+          過去
+        </button>
+        {selectedDate && (
+          <div className="ml-4 px-3 py-2 bg-blue-100 text-blue-800 text-sm rounded-lg font-medium">
+            {selectedDate} のイベント
+          </div>
+        )}
+      </div>
       
       {/* エリアフィルター */}
       <div className="flex flex-wrap gap-2 mb-4">

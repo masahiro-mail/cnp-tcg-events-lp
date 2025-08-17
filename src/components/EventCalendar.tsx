@@ -25,6 +25,10 @@ export default function EventCalendar({ events, selectedDate, onDateSelect }: Ev
 
     const days = []
     
+    // 今日の日付を取得
+    const today = new Date()
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    
     // Previous month's days
     for (let i = 0; i < startingDay; i++) {
       days.push({ day: '', isCurrentMonth: false, hasEvent: false })
@@ -34,7 +38,8 @@ export default function EventCalendar({ events, selectedDate, onDateSelect }: Ev
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
       const hasEvent = events.some(event => event.event_date === dateStr)
-      days.push({ day: day.toString(), isCurrentMonth: true, hasEvent, date: dateStr })
+      const isToday = dateStr === todayStr
+      days.push({ day: day.toString(), isCurrentMonth: true, hasEvent, date: dateStr, isToday })
     }
     
     return days
@@ -99,8 +104,10 @@ export default function EventCalendar({ events, selectedDate, onDateSelect }: Ev
             className={`
               p-2 text-sm rounded-lg transition-colors relative
               ${!day.isCurrentMonth ? 'text-gray-300' : 'text-gray-700'}
-              ${day.hasEvent ? 'bg-cnp-blue text-white font-medium' : 'hover:bg-gray-100'}
-              ${currentSelectedDate === day.date ? 'ring-2 ring-cnp-orange' : ''}
+              ${day.isToday ? 'border-2 border-black font-bold' : ''}
+              ${currentSelectedDate === day.date ? 'bg-blue-500 text-white' : ''}
+              ${day.hasEvent && currentSelectedDate !== day.date ? 'bg-cnp-blue text-white font-medium' : ''}
+              ${!day.hasEvent && currentSelectedDate !== day.date && !day.isToday ? 'hover:bg-gray-100' : ''}
             `}
             disabled={!day.isCurrentMonth}
           >
