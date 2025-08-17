@@ -12,10 +12,10 @@ export default function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-12 h-8 bg-cnp-blue rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-xs">CNPトレカ</span>
+            <div className="w-8 h-8 bg-cnp-blue rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">CNP</span>
             </div>
-            <span className="font-bold text-xl text-gray-900">イベントカレンダー</span>
+            <span className="font-bold text-xl text-gray-900">トレカイベント</span>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-6">

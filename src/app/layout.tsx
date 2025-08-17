@@ -4,14 +4,14 @@ import AuthProvider from '@/components/AuthProvider'
 
 export const metadata: Metadata = {
   title: {
-    default: 'CNPトレカ交流会 | 全国のCNPトレーディングカード交流会情報',
-    template: '%s | CNPトレカ交流会'
+    default: 'CNPトレカイベント | 全国のCNPトレーディングカードのイベント情報',
+    template: '%s | CNPトレカイベント'
   },
-  description: '全国のCNPトレーディングカード交流会の最新情報をまとめて確認。X認証で簡単参加！リアルタイム参加者表示でコミュニティの輪を広げよう。',
+  description: '全国のCNPトレーディングカードのイベント情報をお届け。',
   keywords: ['CNP', 'CNPトレカ', 'トレーディングカード', '交流会', 'イベント', 'カードゲーム', 'コミュニティ'],
-  authors: [{ name: 'CNPトレカ交流会運営' }],
-  creator: 'CNPトレカ交流会運営',
-  publisher: 'CNPトレカ交流会運営',
+  authors: [{ name: 'CNPトレカイベント運営' }],
+  creator: 'CNPトレカイベント運営',
+  publisher: 'CNPトレカイベント運営',
   formatDetection: {
     email: false,
     address: false,
@@ -25,9 +25,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ja_JP',
     url: 'https://cnp-tcg-events-lp-production.up.railway.app',
-    siteName: 'CNPトレカ交流会',
-    title: 'CNPトレカ交流会 | 全国のCNPトレーディングカード交流会情報',
-    description: '全国のCNPトレーディングカード交流会の最新情報をまとめて確認。X認証で簡単参加！リアルタイム参加者表示でコミュニティの輪を広げよう。',
+    siteName: 'CNPトレカイベント',
+    title: 'CNPトレカイベント | 全国のCNPトレーディングカードのイベント情報',
+    description: '全国のCNPトレーディングカードのイベント情報をお届け。',
     images: [
       {
         url: 'https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A',
@@ -42,8 +42,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@cnp_ninjadao',
     creator: '@cnp_ninjadao',
-    title: 'CNPトレカ交流会 | 全国のCNPトレーディングカード交流会情報',
-    description: '全国のCNPトレーディングカード交流会の最新情報をまとめて確認。X認証で簡単参加！リアルタイム参加者表示でコミュニティの輪を広げよう。',
+    title: 'CNPトレカイベント | 全国のCNPトレーディングカードのイベント情報',
+    description: '全国のCNPトレーディングカードのイベント情報をお届け。',
     images: ['https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A'],
   },
   robots: {
