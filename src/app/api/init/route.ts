@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { initDatabase } from '@/lib/database'
 
-export async function POST() {
+async function initializeDatabase() {
   try {
     await initDatabase()
     return NextResponse.json({ success: true, message: 'Database initialized successfully' })
@@ -12,4 +12,12 @@ export async function POST() {
       { status: 500 }
     )
   }
+}
+
+export async function GET() {
+  return initializeDatabase()
+}
+
+export async function POST() {
+  return initializeDatabase()
 }

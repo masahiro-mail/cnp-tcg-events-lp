@@ -1,10 +1,19 @@
 import { Pool } from 'pg';
 import { Event, Participant, CreateEventData, CreateParticipantData, User, EventMaster, Participation, CreateUserData, DatabasePool } from '@/types/database';
+import fileStorage from './file-storage';
 
 // 環境判定
 const isLocalDev = process.env.DATABASE_URL?.startsWith('file:');
 const isProduction = process.env.NODE_ENV === 'production';
 const databaseUrl = process.env.DATABASE_URL;
+
+console.log('🔍 データベース環境判定:');
+console.log('- DATABASE_URL:', databaseUrl);
+console.log('- isLocalDev:', isLocalDev);
+console.log('- isProduction:', isProduction);
+
+// SQLiteファイルベースDB用の設定
+const isSQLiteFile = databaseUrl?.startsWith('file:') && !databaseUrl.includes('memory');
 
 
 // メモリ内データストア
@@ -20,21 +29,53 @@ let mockData = {
 if (typeof window === 'undefined') {
   // サーバーサイドで永続化データを同期的に初期化
   try {
-    const { generateTestUsers, generateTestEventMasters, generateTestEvents } = require('./mock-data');
-    
-    // 永続化イベントデータを読み込み（開発・本番両環境）
-    mockData.users = generateTestUsers();
-    mockData.event_masters = generateTestEventMasters();
-    mockData.events = generateTestEvents();
-    mockData.participants = [];
-    mockData.participations = [];
+    if (isLocalDev && databaseUrl?.includes('.json')) {
+      // ファイルストレージからデータを読み込み
+      console.log('📁 ファイルストレージからデータを読み込み中...');
+      const persistentData = fileStorage.load();
+      
+      mockData.users = persistentData.users;
+      mockData.event_masters = persistentData.event_masters;
+      mockData.events = persistentData.events;
+      mockData.participants = persistentData.participants;
+      mockData.participations = persistentData.participations;
+      
+      // データが空の場合、初期データを作成
+      if (mockData.events.length === 0) {
+        const { generateTestUsers, generateTestEventMasters, generateTestEvents } = require('./mock-data');
+        mockData.users = [...mockData.users, ...generateTestUsers()];
+        mockData.event_masters = [...mockData.event_masters, ...generateTestEventMasters()];
+        mockData.events = [...mockData.events, ...generateTestEvents()];
+        
+        // ファイルに保存
+        fileStorage.save({
+          users: mockData.users,
+          events: mockData.events,
+          participants: mockData.participants,
+          event_masters: mockData.event_masters,
+          participations: mockData.participations,
+          lastUpdated: new Date().toISOString()
+        });
+      }
+    } else {
+      // モック/PostgreSQLデータを読み込み（従来の方法）
+      const { generateTestUsers, generateTestEventMasters, generateTestEvents } = require('./mock-data');
+      
+      mockData.users = generateTestUsers();
+      mockData.event_masters = generateTestEventMasters();
+      mockData.events = generateTestEvents();
+      mockData.participants = [];
+      mockData.participations = [];
+    }
     
     const environment = isProduction ? '本番環境' : '開発環境';
-    console.log(`🎯 ${environment} - 永続化イベントデータを読み込みました`);
+    const storageType = databaseUrl?.includes('.json') ? 'ファイルストレージ' : 'メモリ/PostgreSQL';
+    console.log(`🎯 ${environment} (${storageType}) - 永続化イベントデータを読み込みました`);
     console.log(`- ユーザー: ${mockData.users.length}人`);
     console.log(`- イベントマスター: ${mockData.event_masters.length}件`);
     console.log(`- 現在のイベント: ${mockData.events.length}件`);
     console.log(`- 参加者: ${mockData.participants.length}件`);
+    console.log(`- 参加履歴: ${mockData.participations.length}件`);
   } catch (error) {
     console.log('永続化データの読み込みエラー:', error.message);
   }
@@ -756,6 +797,20 @@ export const upsertUser = async (userData: {
       });
     }
     console.log('User upserted in mock data:', userData.x_id);
+    
+    // ファイルストレージに保存（永続化）
+    if (databaseUrl?.includes('.json')) {
+      fileStorage.save({
+        users: mockData.users,
+        events: mockData.events,
+        participants: mockData.participants,
+        event_masters: mockData.event_masters,
+        participations: mockData.participations,
+        lastUpdated: new Date().toISOString()
+      });
+      console.log('💾 ユーザーデータをファイルストレージに永続化しました');
+    }
+    
     return;
   }
 
@@ -937,6 +992,19 @@ export const joinEvent = async (eventId: string, userData: {
       };
       mockData.participations.push(participation);
       console.log('Mock participation history added:', participation.id);
+    }
+    
+    // ファイルストレージに保存（永続化）
+    if (databaseUrl?.includes('.json')) {
+      fileStorage.save({
+        users: mockData.users,
+        events: mockData.events,
+        participants: mockData.participants,
+        event_masters: mockData.event_masters,
+        participations: mockData.participations,
+        lastUpdated: new Date().toISOString()
+      });
+      console.log('💾 参加者データをファイルストレージに永続化しました');
     }
     
     console.log('Mock participant added:', participant.id);
