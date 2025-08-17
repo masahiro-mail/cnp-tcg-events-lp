@@ -73,6 +73,7 @@ export default function HomePage() {
               <EventList 
                 events={events} 
                 selectedDate={selectedDate}
+                onDateClear={() => setSelectedDate(null)}
               />
             )}
           </div>

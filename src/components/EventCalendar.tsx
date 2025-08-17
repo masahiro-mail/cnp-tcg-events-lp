@@ -106,36 +106,18 @@ export default function EventCalendar({ events, selectedDate, onDateSelect }: Ev
               ${!day.isCurrentMonth ? 'text-gray-300' : 'text-gray-700'}
               ${day.isToday ? 'border-2 border-black font-bold' : ''}
               ${currentSelectedDate === day.date ? 'bg-blue-500 text-white' : ''}
-              ${day.hasEvent && currentSelectedDate !== day.date ? 'bg-cnp-blue text-white font-medium' : ''}
-              ${!day.hasEvent && currentSelectedDate !== day.date && !day.isToday ? 'hover:bg-gray-100' : ''}
+              ${!currentSelectedDate && !day.isToday ? 'hover:bg-gray-100' : ''}
             `}
             disabled={!day.isCurrentMonth}
           >
             {day.day}
             {day.hasEvent && (
-              <div className="absolute top-1 right-1 w-2 h-2 bg-cnp-orange rounded-full"></div>
+              <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></div>
             )}
           </button>
         ))}
       </div>
 
-      {currentSelectedDate && selectedEvents.length > 0 && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-medium text-gray-900 mb-2">
-            {currentSelectedDate} のイベント
-          </h4>
-          <div className="space-y-2">
-            {selectedEvents.map((event) => (
-              <div key={event.id} className="text-sm">
-                <div className="font-medium text-cnp-blue">{event.name}</div>
-                <div className="text-gray-600">
-                  {event.start_time} - {event.venue_name}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -65,7 +65,7 @@ export default function Header() {
               </div>
             ) : (
               <Link
-                href="/auth/signin"
+                href="/api/auth/signin"
                 className="cnp-button-primary text-sm"
               >
                 ログイン

@@ -7,6 +7,7 @@ import Link from 'next/link'
 interface EventListProps {
   events: Event[]
   selectedDate?: string | null
+  onDateClear?: () => void
 }
 
 const AREAS = [
@@ -24,7 +25,7 @@ const AREAS = [
 
 type TimeFilter = 'future' | 'past'
 
-export default function EventList({ events, selectedDate }: EventListProps) {
+export default function EventList({ events, selectedDate, onDateClear }: EventListProps) {
   const [selectedArea, setSelectedArea] = useState('全て')
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('future')
 
@@ -96,7 +97,10 @@ export default function EventList({ events, selectedDate }: EventListProps) {
       {/* 今後/過去フィルター（常に表示） */}
       <div className="flex gap-2 mb-4">
         <button
-          onClick={() => setTimeFilter('future')}
+          onClick={() => {
+            setTimeFilter('future')
+            onDateClear?.()
+          }}
           className={`
             px-4 py-2 rounded-lg text-sm font-medium transition-colors
             ${timeFilter === 'future'
@@ -108,7 +112,10 @@ export default function EventList({ events, selectedDate }: EventListProps) {
           今後
         </button>
         <button
-          onClick={() => setTimeFilter('past')}
+          onClick={() => {
+            setTimeFilter('past')
+            onDateClear?.()
+          }}
           className={`
             px-4 py-2 rounded-lg text-sm font-medium transition-colors
             ${timeFilter === 'past'
@@ -119,11 +126,6 @@ export default function EventList({ events, selectedDate }: EventListProps) {
         >
           過去
         </button>
-        {selectedDate && (
-          <div className="ml-4 px-3 py-2 bg-blue-100 text-blue-800 text-sm rounded-lg font-medium">
-            {selectedDate} のイベント
-          </div>
-        )}
       </div>
       
       {/* エリアフィルター */}
