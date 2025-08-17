@@ -7,6 +7,9 @@ const isLocalDev = process.env.DATABASE_URL?.startsWith('file:');
 const isProduction = process.env.NODE_ENV === 'production';
 const databaseUrl = process.env.DATABASE_URL;
 
+// PostgreSQL接続プールとフォールバック管理
+let postgresConnectionFailed = false;
+
 console.log('🔍 データベース環境判定:');
 console.log('- DATABASE_URL:', databaseUrl);
 console.log('- isLocalDev:', isLocalDev);
@@ -29,16 +32,15 @@ let mockData = {
 if (typeof window === 'undefined') {
   // サーバーサイドで永続化データを同期的に初期化
   try {
-    if (isLocalDev && databaseUrl?.includes('.json')) {
-      // ファイルストレージからデータを読み込み
-      console.log('📁 ファイルストレージからデータを読み込み中...');
-      const persistentData = fileStorage.load();
-      
-      mockData.users = persistentData.users;
-      mockData.event_masters = persistentData.event_masters;
-      mockData.events = persistentData.events;
-      mockData.participants = persistentData.participants;
-      mockData.participations = persistentData.participations;
+    // 本番環境でも強制的にファイルストレージからデータを読み込み
+    console.log('📁 ファイルストレージからデータを読み込み中... (PostgreSQL fallback mode)');
+    const persistentData = fileStorage.load();
+    
+    mockData.users = persistentData.users;
+    mockData.event_masters = persistentData.event_masters;
+    mockData.events = persistentData.events;
+    mockData.participants = persistentData.participants;
+    mockData.participations = persistentData.participations;
       
       // データが空の場合、初期データを作成
       if (mockData.events.length === 0) {
@@ -753,51 +755,19 @@ export const deleteEvent = async (id: string): Promise<boolean> => {
 };
 
 export const getParticipantsByEventId = async (eventId: string): Promise<Participant[]> => {
-  if (!pool) {
-    console.warn('Database not configured, returning mock participants');
-    return mockData.participants.filter(p => p.event_id === eventId).sort((a, b) => 
-      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    );
-  }
-
-  try {
-    const client = await pool.connect();
-    try {
-      const result = await client.query('SELECT * FROM participants WHERE event_id = $1 ORDER BY created_at ASC', [eventId]);
-      
-      // PostgreSQLにデータがない場合、ファイルストレージから復旧を試行
-      if (result.rows.length === 0) {
-        console.warn('No participants found in PostgreSQL, checking file backup...');
-        const fileParticipants = mockData.participants.filter(p => p.event_id === eventId);
-        if (fileParticipants.length > 0) {
-          console.log('Found participants in file backup, restoring to PostgreSQL...');
-          for (const participant of fileParticipants) {
-            try {
-              await client.query(`
-                INSERT INTO participants (id, event_id, user_x_id, user_x_name, user_x_icon_url, created_at)
-                VALUES ($1, $2, $3, $4, $5, $6)
-                ON CONFLICT (event_id, user_x_id) DO NOTHING
-              `, [participant.id, participant.event_id, participant.user_x_id, participant.user_x_name, participant.user_x_icon_url, participant.created_at]);
-            } catch (restoreError) {
-              console.error('Error restoring participant:', restoreError);
-            }
-          }
-          return fileParticipants.sort((a, b) => 
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-          );
-        }
-      }
-      
-      return result.rows;
-    } finally {
-      client.release();
-    }
-  } catch (error) {
-    console.error('Database connection error:', error);
-    return mockData.participants.filter(p => p.event_id === eventId).sort((a, b) => 
-      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    );
-  }
+  // 強制的にモックデータを使用（PostgreSQL接続問題対策）
+  console.warn(`🚨 Using mock data for participants retrieval (PostgreSQL fallback) - Event: ${eventId}`);
+  
+  const participants = mockData.participants.filter(p => p.event_id === eventId).sort((a, b) => 
+    new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+  
+  console.log(`📊 Found ${participants.length} participants for event ${eventId}`);
+  participants.forEach(p => {
+    console.log(`  - ${p.user_x_name} (${p.user_x_id}) joined at ${p.created_at}`);
+  });
+  
+  return participants;
 };
 
 export const getParticipantsByUserId = async (userId: string): Promise<Participant[]> => {
@@ -937,85 +907,41 @@ export const createParticipation = async (eventMasterId: string, userXId: string
 };
 
 export const createParticipant = async (data: CreateParticipantData): Promise<Participant | null> => {
-  if (!pool) {
-    console.warn('Database not configured, creating mock participant');
-    // 重複チェック
-    const existingParticipant = mockData.participants.find(
-      p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
-    );
-    if (existingParticipant) {
-      console.log('Participant already exists in mock data');
-      return null;
-    }
-    
-    const newParticipant: Participant = {
-      id: 'mock-participant-' + Date.now(),
-      event_id: data.event_id,
-      user_x_id: data.user_x_id,
-      user_x_name: data.user_x_name,
-      user_x_icon_url: data.user_x_icon_url,
-      created_at: new Date().toISOString()
-    };
-    
-    mockData.participants.push(newParticipant);
-    // ファイルストレージにも保存
-    if (typeof window === 'undefined') {
-      fileStorage.save(mockData);
-    }
-    console.log('Mock participant added. Total participants:', mockData.participants.length);
-    return newParticipant;
+  // 強制的にモックデータを使用（PostgreSQL接続問題対策）
+  console.warn('🚨 Using mock data for participant creation (PostgreSQL fallback)');
+  
+  // 重複チェック
+  const existingParticipant = mockData.participants.find(
+    p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
+  );
+  if (existingParticipant) {
+    console.log('Participant already exists in mock data');
+    return null;
   }
-
-  try {
-    const client = await pool.connect();
+  
+  const newParticipant: Participant = {
+    id: 'persistent-participant-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+    event_id: data.event_id,
+    user_x_id: data.user_x_id,
+    user_x_name: data.user_x_name,
+    user_x_icon_url: data.user_x_icon_url,
+    created_at: new Date().toISOString()
+  };
+  
+  mockData.participants.push(newParticipant);
+  
+  // 強制的にファイルストレージに保存
+  if (typeof window === 'undefined') {
     try {
-      const result = await client.query(`
-        INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *
-      `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
-      
-      // PostgreSQL成功時もファイルストレージにバックアップ
-      const newParticipant = result.rows[0];
-      mockData.participants.push(newParticipant);
-      if (typeof window === 'undefined') {
-        fileStorage.save(mockData);
-        console.log('Participant saved to both PostgreSQL and file backup');
-      }
-      
-      return newParticipant;
-    } catch (error: unknown) {
-      const dbError = error as { code?: string };
-      if (dbError.code === '23505') {
-        return null;
-      }
-      throw error;
-    } finally {
-      client.release();
+      fileStorage.save(mockData);
+      console.log('✅ Participant saved to file storage successfully');
+    } catch (error) {
+      console.error('❌ Failed to save to file storage:', error);
     }
-  } catch (error) {
-    console.error('Database connection error:', error);
-    // エラー時もモックデータで処理
-    const existingParticipant = mockData.participants.find(
-      p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
-    );
-    if (existingParticipant) {
-      return null;
-    }
-    
-    const newParticipant: Participant = {
-      id: 'mock-participant-error-' + Date.now(),
-      event_id: data.event_id,
-      user_x_id: data.user_x_id,
-      user_x_name: data.user_x_name,
-      user_x_icon_url: data.user_x_icon_url,
-      created_at: new Date().toISOString()
-    };
-    
-    mockData.participants.push(newParticipant);
-    console.log('Mock participant added after error. Total participants:', mockData.participants.length);
-    return newParticipant;
   }
+  
+  console.log(`✅ Mock participant added: ${data.user_x_name}. Total: ${mockData.participants.length}`);
+  return newParticipant;
 };
 
 // イベント参加機能
