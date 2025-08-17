@@ -40,7 +40,17 @@ export async function POST(
       }
       
       console.log(`✅ [PARTICIPATE] 参加登録成功 - Event: ${eventId}, User: ${userName}`)
-      return NextResponse.json({ success: true, message: '参加しました' })
+      return NextResponse.json({ 
+        success: true, 
+        message: '参加しました',
+        debug: {
+          eventId,
+          userName,
+          userId,
+          apiCalled: true,
+          timestamp: new Date().toISOString()
+        }
+      })
     } else if (action === 'leave') {
       console.log(`🚀 [LEAVE] キャンセル処理開始 - Event: ${eventId}, User: ${userName} (${userId})`)
       
