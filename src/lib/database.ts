@@ -41,33 +41,23 @@ if (typeof window === 'undefined') {
     mockData.events = persistentData.events;
     mockData.participants = persistentData.participants;
     mockData.participations = persistentData.participations;
-      
-      // データが空の場合、初期データを作成
-      if (mockData.events.length === 0) {
-        const { generateTestUsers, generateTestEventMasters, generateTestEvents } = require('./mock-data');
-        mockData.users = [...mockData.users, ...generateTestUsers()];
-        mockData.event_masters = [...mockData.event_masters, ...generateTestEventMasters()];
-        mockData.events = [...mockData.events, ...generateTestEvents()];
-        
-        // ファイルに保存
-        fileStorage.save({
-          users: mockData.users,
-          events: mockData.events,
-          participants: mockData.participants,
-          event_masters: mockData.event_masters,
-          participations: mockData.participations,
-          lastUpdated: new Date().toISOString()
-        });
-      }
-    } else {
-      // モック/PostgreSQLデータを読み込み（従来の方法）
+    
+    // データが空の場合、初期データを作成
+    if (mockData.events.length === 0) {
       const { generateTestUsers, generateTestEventMasters, generateTestEvents } = require('./mock-data');
+      mockData.users = [...mockData.users, ...generateTestUsers()];
+      mockData.event_masters = [...mockData.event_masters, ...generateTestEventMasters()];
+      mockData.events = [...mockData.events, ...generateTestEvents()];
       
-      mockData.users = generateTestUsers();
-      mockData.event_masters = generateTestEventMasters();
-      mockData.events = generateTestEvents();
-      mockData.participants = [];
-      mockData.participations = [];
+      // ファイルに保存
+      fileStorage.save({
+        users: mockData.users,
+        events: mockData.events,
+        participants: mockData.participants,
+        event_masters: mockData.event_masters,
+        participations: mockData.participations,
+        lastUpdated: new Date().toISOString()
+      });
     }
     
     const environment = isProduction ? '本番環境' : '開発環境';
