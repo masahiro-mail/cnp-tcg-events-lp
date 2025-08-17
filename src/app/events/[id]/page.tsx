@@ -33,9 +33,9 @@ export async function generateMetadata({ params }: EventDetailPageProps): Promis
   }
 
   const eventDateTime = `${formatDate(event.event_date)} ${formatTime(event.start_time)}`
-  const description = `【${event.area}・${event.prefecture}】${eventDateTime}開催！${event.venue_name}で開催されるCNPトレカ交流会。${event.description.slice(0, 80)}...`
+  const description = `【${event.area}・${event.prefecture}】${eventDateTime}開催！${event.venue_name}で開催されるCNPトレカイベント。${event.description.slice(0, 80)}...`
   
-  const title = `${event.name} | CNPトレカ交流会`
+  const title = `${event.name} | CNPトレカ イベントページ`
   const url = `https://cnp-tcg-events-lp-production.up.railway.app/events/${params.id}`
 
   return {
@@ -45,13 +45,13 @@ export async function generateMetadata({ params }: EventDetailPageProps): Promis
       title,
       description,
       url,
-      siteName: 'CNPトレカ交流会',
+      siteName: 'CNPトレカ イベントページ',
       images: [
         {
-          url: `https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=${encodeURIComponent(event.name)}%20-%20CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A`,
+          url: `https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=${encodeURIComponent(event.name)}%20-%20CNP%E3%83%88%E3%83%AC%E3%82%AB%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88`,
           width: 1200,
           height: 630,
-          alt: `${event.name} - CNPトレカ交流会`,
+          alt: `${event.name} - CNPトレカ イベントページ`,
         }
       ],
       locale: 'ja_JP',
@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: EventDetailPageProps): Promis
       card: 'summary_large_image',
       title,
       description,
-      images: [`https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=${encodeURIComponent(event.name)}%20-%20CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A`],
+      images: [`https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=${encodeURIComponent(event.name)}%20-%20CNP%E3%83%88%E3%83%AC%E3%82%AB%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88`],
       site: '@cnp_ninjadao',
       creator: '@cnp_ninjadao',
     },
@@ -188,7 +188,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             <div className="mt-6 space-y-4">
               <ParticipateButton eventId={params.id} />
               <TwitterPostButton 
-                text={`${event.name}開催決定🎉詳細は以下のURLよりご確認下さい😊 #CNP #CNPトレカ #交流会 #${event.area}`}
+                text={`${event.name}開催決定🎉詳細は以下のURLよりご確認下さい😊 #CNP #CNPトレカ #イベント #${event.area}`}
                 url={`https://cnp-tcg-events-lp-production.up.railway.app/events/${params.id}`}
                 hashtags={[]}
               />

@@ -4,14 +4,14 @@ import AuthProvider from '@/components/AuthProvider'
 
 export const metadata: Metadata = {
   title: {
-    default: 'CNPトレカイベント | 全国のCNPトレーディングカードのイベント情報',
-    template: '%s | CNPトレカイベント'
+    default: 'CNPトレカ イベントページ | 全世界のCNPトレカのイベント情報',
+    template: '%s | CNPトレカ イベントページ'
   },
-  description: '全国のCNPトレーディングカードのイベント情報をお届け。',
+  description: '全世界のCNPトレカのイベント情報をまとめています。',
   keywords: ['CNP', 'CNPトレカ', 'トレーディングカード', '交流会', 'イベント', 'カードゲーム', 'コミュニティ'],
-  authors: [{ name: 'CNPトレカイベント運営' }],
-  creator: 'CNPトレカイベント運営',
-  publisher: 'CNPトレカイベント運営',
+  authors: [{ name: 'CNPトレカ イベントページ運営' }],
+  creator: 'CNPトレカ イベントページ運営',
+  publisher: 'CNPトレカ イベントページ運営',
   formatDetection: {
     email: false,
     address: false,
@@ -25,15 +25,15 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ja_JP',
     url: 'https://cnp-tcg-events-lp-production.up.railway.app',
-    siteName: 'CNPトレカイベント',
-    title: 'CNPトレカイベント | 全国のCNPトレーディングカードのイベント情報',
-    description: '全国のCNPトレーディングカードのイベント情報をお届け。',
+    siteName: 'CNPトレカ イベントページ',
+    title: 'CNPトレカ イベントページ | 全世界のCNPトレカのイベント情報',
+    description: '全世界のCNPトレカのイベント情報をまとめています。',
     images: [
       {
-        url: 'https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A',
+        url: 'https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=CNP%E3%83%88%E3%83%AC%E3%82%AB%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88',
         width: 1200,
         height: 630,
-        alt: 'CNPトレカ交流会 - 全国のイベント情報をお届け',
+        alt: 'CNPトレカ イベントページ - 全世界のイベント情報をまとめています',
         type: 'image/png',
       }
     ],
@@ -42,9 +42,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@cnp_ninjadao',
     creator: '@cnp_ninjadao',
-    title: 'CNPトレカイベント | 全国のCNPトレーディングカードのイベント情報',
-    description: '全国のCNPトレーディングカードのイベント情報をお届け。',
-    images: ['https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=CNP%E3%83%88%E3%83%AC%E3%82%AB%E4%BA%A4%E6%B5%81%E4%BC%9A'],
+    title: 'CNPトレカ イベントページ | 全世界のCNPトレカのイベント情報',
+    description: '全世界のCNPトレカのイベント情報をまとめています。',
+    images: ['https://via.placeholder.com/1200x630/4F46E5/FFFFFF?text=CNP%E3%83%88%E3%83%AC%E3%82%AB%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88'],
   },
   robots: {
     index: true,
