@@ -764,6 +764,30 @@ export const getParticipantsByEventId = async (eventId: string): Promise<Partici
     const client = await pool.connect();
     try {
       const result = await client.query('SELECT * FROM participants WHERE event_id = $1 ORDER BY created_at ASC', [eventId]);
+      
+      // PostgreSQLにデータがない場合、ファイルストレージから復旧を試行
+      if (result.rows.length === 0) {
+        console.warn('No participants found in PostgreSQL, checking file backup...');
+        const fileParticipants = mockData.participants.filter(p => p.event_id === eventId);
+        if (fileParticipants.length > 0) {
+          console.log('Found participants in file backup, restoring to PostgreSQL...');
+          for (const participant of fileParticipants) {
+            try {
+              await client.query(`
+                INSERT INTO participants (id, event_id, user_x_id, user_x_name, user_x_icon_url, created_at)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT (event_id, user_x_id) DO NOTHING
+              `, [participant.id, participant.event_id, participant.user_x_id, participant.user_x_name, participant.user_x_icon_url, participant.created_at]);
+            } catch (restoreError) {
+              console.error('Error restoring participant:', restoreError);
+            }
+          }
+          return fileParticipants.sort((a, b) => 
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+        }
+      }
+      
       return result.rows;
     } finally {
       client.release();
@@ -934,6 +958,10 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
     };
     
     mockData.participants.push(newParticipant);
+    // ファイルストレージにも保存
+    if (typeof window === 'undefined') {
+      fileStorage.save(mockData);
+    }
     console.log('Mock participant added. Total participants:', mockData.participants.length);
     return newParticipant;
   }
@@ -946,7 +974,16 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
         VALUES ($1, $2, $3, $4)
         RETURNING *
       `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
-      return result.rows[0];
+      
+      // PostgreSQL成功時もファイルストレージにバックアップ
+      const newParticipant = result.rows[0];
+      mockData.participants.push(newParticipant);
+      if (typeof window === 'undefined') {
+        fileStorage.save(mockData);
+        console.log('Participant saved to both PostgreSQL and file backup');
+      }
+      
+      return newParticipant;
     } catch (error: unknown) {
       const dbError = error as { code?: string };
       if (dbError.code === '23505') {
