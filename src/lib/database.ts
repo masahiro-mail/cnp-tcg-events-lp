@@ -277,12 +277,34 @@ if (isLocalDev) {
     })
   };
 } else {
+  // 本番環境PostgreSQL設定
+  const connectionString = process.env.DATABASE_URL;
+  
+  if (!connectionString) {
+    console.error('❌ DATABASE_URL が設定されていません');
+    throw new Error('DATABASE_URL environment variable is required for production');
+  }
+  
+  console.log('🔗 PostgreSQL接続を初期化中...');
+  console.log('- Connection String:', connectionString.replace(/:[^:/@]*@/, ':***@')); // パスワードを隠す
+  
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false,
+    connectionString,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 10000, // タイムアウトを延長
+    allowExitOnIdle: false,
+    application_name: 'cnp-tcg-events'
+  });
+  
+  // 接続テスト
+  pool.on('connect', (client) => {
+    console.log('✅ PostgreSQL接続成功');
+  });
+  
+  pool.on('error', (err) => {
+    console.error('❌ PostgreSQL接続エラー:', err);
   });
 }
 
