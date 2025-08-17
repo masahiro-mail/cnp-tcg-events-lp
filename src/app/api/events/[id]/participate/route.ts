@@ -23,6 +23,8 @@ export async function POST(
     const userImage = user.image || ''
 
     if (action === 'join') {
+      console.log(`🚀 [PARTICIPATE] 参加登録開始 - Event: ${eventId}, User: ${userName} (${userId})`)
+      
       const success = await joinEvent(eventId, {
         user_x_id: userId,
         user_x_name: userName,
@@ -30,17 +32,23 @@ export async function POST(
       })
       
       if (!success) {
+        console.log(`❌ [PARTICIPATE] 参加登録失敗（既に参加済み） - Event: ${eventId}, User: ${userName}`)
         return NextResponse.json({ error: '既に参加済みです' }, { status: 400 })
       }
       
+      console.log(`✅ [PARTICIPATE] 参加登録成功 - Event: ${eventId}, User: ${userName}`)
       return NextResponse.json({ success: true, message: '参加しました' })
     } else if (action === 'leave') {
+      console.log(`🚀 [LEAVE] キャンセル処理開始 - Event: ${eventId}, User: ${userName} (${userId})`)
+      
       const success = await leaveEvent(eventId, userId)
       
       if (!success) {
+        console.log(`❌ [LEAVE] キャンセル失敗 - Event: ${eventId}, User: ${userName}`)
         return NextResponse.json({ error: 'キャンセルに失敗しました' }, { status: 400 })
       }
       
+      console.log(`✅ [LEAVE] キャンセル成功 - Event: ${eventId}, User: ${userName}`)
       return NextResponse.json({ success: true, message: 'キャンセルしました' })
     } else {
       return NextResponse.json({ error: '不正なアクションです' }, { status: 400 })
