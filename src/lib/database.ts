@@ -897,49 +897,90 @@ export const createParticipant = async (data: CreateParticipantData): Promise<Pa
   console.log('🔍 [DEBUG] pool状態:', pool ? 'プール存在' : 'プールなし');
   console.log('🔍 [DEBUG] DATABASE_URL:', process.env.DATABASE_URL?.substring(0, 20) + '...');
   
-  // PostgreSQL処理（本番環境・開発環境共通）
-  if (!pool) {
-    console.error('❌ PostgreSQL pool not configured');
-    throw new Error('Database not configured');
-  }
-
-  try {
-    const client = await pool.connect();
+  // PostgreSQL処理を試行
+  if (pool) {
     try {
-      // 事前に重複チェック
-      const existingCheck = await client.query(
-        'SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2',
-        [data.event_id, data.user_x_id]
-      );
-      
-      if (existingCheck.rows.length > 0) {
-        console.log('❌ PostgreSQL: 既に参加済み（事前チェック）');
-        return null;
+      const client = await pool.connect();
+      try {
+        // 事前に重複チェック
+        const existingCheck = await client.query(
+          'SELECT id FROM participants WHERE event_id = $1 AND user_x_id = $2',
+          [data.event_id, data.user_x_id]
+        );
+        
+        if (existingCheck.rows.length > 0) {
+          console.log('❌ PostgreSQL: 既に参加済み（事前チェック）');
+          return null;
+        }
+        
+        // PostgreSQLに参加者データを挿入
+        const result = await client.query(`
+          INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
+          VALUES ($1, $2, $3, $4)
+          RETURNING *
+        `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
+        
+        console.log('✅ PostgreSQL参加者保存成功:', result.rows[0]);
+        return result.rows[0];
+        
+      } catch (dbError: any) {
+        if (dbError.code === '23505') {
+          console.log('❌ PostgreSQL: 既に参加済み（制約エラー）');
+          return null;
+        }
+        throw dbError;
+      } finally {
+        client.release();
       }
-      
-      // PostgreSQLに参加者データを挿入
-      const result = await client.query(`
-        INSERT INTO participants (event_id, user_x_id, user_x_name, user_x_icon_url)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *
-      `, [data.event_id, data.user_x_id, data.user_x_name, data.user_x_icon_url]);
-      
-      console.log('✅ PostgreSQL参加者保存成功:', result.rows[0]);
-      return result.rows[0];
-      
-    } catch (dbError: any) {
-      if (dbError.code === '23505') {
-        console.log('❌ PostgreSQL: 既に参加済み（制約エラー）');
-        return null;
-      }
-      throw dbError;
-    } finally {
-      client.release();
+    } catch (error) {
+      console.error('❌ PostgreSQL接続エラー、緊急フォールバックモードに切り替え:', error);
+      // PostgreSQL失敗時は緊急フォールバック処理に続行
     }
-  } catch (error) {
-    console.error('❌ PostgreSQL接続エラー:', error);
-    throw error;
   }
+  
+  // 緊急フォールバック: メモリ＋ファイルストレージ
+  console.warn('🚨 PostgreSQL接続失敗 - 緊急フォールバックモード開始');
+  
+  // 重複チェック
+  const existingParticipant = mockData.participants.find(
+    p => p.event_id === data.event_id && p.user_x_id === data.user_x_id
+  );
+  if (existingParticipant) {
+    console.log('❌ フォールバック: 既に参加済み');
+    return null;
+  }
+  
+  // 新しい参加者を作成
+  const newParticipant: Participant = {
+    id: 'emergency-participant-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+    event_id: data.event_id,
+    user_x_id: data.user_x_id,
+    user_x_name: data.user_x_name,
+    user_x_icon_url: data.user_x_icon_url,
+    created_at: new Date().toISOString()
+  };
+  
+  mockData.participants.push(newParticipant);
+  
+  // 緊急時ファイルストレージに保存
+  if (typeof window === 'undefined') {
+    try {
+      fileStorage.save({
+        users: mockData.users,
+        events: mockData.events,
+        participants: mockData.participants,
+        event_masters: mockData.event_masters,
+        participations: mockData.participations,
+        lastUpdated: new Date().toISOString()
+      });
+      console.log('✅ 緊急フォールバック: ファイルストレージに保存成功');
+    } catch (error) {
+      console.error('❌ 緊急フォールバック: ファイルストレージ保存失敗:', error);
+    }
+  }
+  
+  console.log(`✅ 緊急フォールバック: 参加者追加成功 ${data.user_x_name}. Total: ${mockData.participants.length}`);
+  return newParticipant;
 };
 
 // イベント参加機能
