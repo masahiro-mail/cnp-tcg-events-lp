@@ -104,8 +104,8 @@ export default function EventCalendar({ events, selectedDate, onDateSelect }: Ev
             className={`
               p-2 text-sm rounded-lg transition-colors relative
               ${!day.isCurrentMonth ? 'text-gray-300' : 'text-gray-700'}
-              ${day.isToday ? 'border-2 border-black font-bold' : ''}
-              ${currentSelectedDate === day.date ? 'bg-blue-500 text-white' : ''}
+              ${day.isToday ? 'border-2 border-red-500 font-bold' : ''}
+              ${currentSelectedDate === day.date ? 'bg-cnp-blue text-white' : ''}
               ${!currentSelectedDate && !day.isToday ? 'hover:bg-gray-100' : ''}
             `}
             disabled={!day.isCurrentMonth}
