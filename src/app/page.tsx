@@ -89,8 +89,37 @@ export default function HomePage() {
 
       </div>
       
+      {/* ご意見・ご要望セクション */}
+      <section className="bg-white py-12 mt-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            ご意見・ご要望をお聞かせください
+          </h2>
+          <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
+            サイトの改善や新機能のご提案など、ご意見・ご要望があれば遠慮なくDMください
+          </p>
+          <div className="flex justify-center">
+            <a
+              href="https://twitter.com/messages/compose?recipient_id=zukaishi_wolf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors duration-200"
+            >
+              <svg 
+                className="w-5 h-5 mr-2" 
+                fill="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              XでDMを送る
+            </a>
+          </div>
+        </div>
+      </section>
+      
       {/* フッター - クレジット */}
-      <footer className="bg-gray-50 border-t border-gray-200 py-6 mt-12">
+      <footer className="bg-gray-50 border-t border-gray-200 py-6">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-gray-500">
             Created by 図解師★ウルフ
