@@ -25,10 +25,9 @@ export async function POST() {
     const client = await pool.connect();
     
     try {
-      // 直接定義したイベントデータ
+      // 直接定義したイベントデータ（UUIDs自動生成）
       const seedEvents = [
         {
-          id: 'event-tokyo-championship-20250125',
           name: '東京CNPトレカチャンピオンシップ',
           event_date: '2025-01-25',
           start_time: '10:00',
@@ -43,7 +42,6 @@ export async function POST() {
           announcement_url: 'https://twitter.com/tokyo_cnp_tcg/status/123456789'
         },
         {
-          id: 'event-osaka-championship-20250216',
           name: '大阪CNPトレカバトル大会',
           event_date: '2025-02-16',
           start_time: '13:00',
@@ -58,7 +56,6 @@ export async function POST() {
           announcement_url: 'https://twitter.com/osaka_cnp_tcg/status/123456790'
         },
         {
-          id: 'event-nagoya-meetup-20250308',
           name: '名古屋CNPトレカ交流会',
           event_date: '2025-03-08',
           start_time: '14:00',
@@ -73,7 +70,6 @@ export async function POST() {
           announcement_url: 'https://twitter.com/nagoya_cnp_tcg/status/123456791'
         },
         {
-          id: 'event-fukuoka-tournament-20250322',
           name: '福岡CNPトレカトーナメント',
           event_date: '2025-03-22',
           start_time: '11:00',
@@ -88,7 +84,6 @@ export async function POST() {
           announcement_url: 'https://twitter.com/fukuoka_cnp_tcg/status/123456792'
         },
         {
-          id: 'event-sapporo-winter-20250405',
           name: '札幌CNPトレカ春祭り',
           event_date: '2025-04-05',
           start_time: '12:00',
@@ -111,57 +106,32 @@ export async function POST() {
       // Event Masters と Events の両方に挿入
       for (const event of seedEvents) {
         try {
-          // Event Master として挿入
-          await client.query(`
-            INSERT INTO event_masters (id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url, is_active, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, true, NOW(), NOW())
-            ON CONFLICT (id) DO UPDATE SET
-              name = EXCLUDED.name,
-              event_date = EXCLUDED.event_date,
-              start_time = EXCLUDED.start_time,
-              end_time = EXCLUDED.end_time,
-              organizer = EXCLUDED.organizer,
-              area = EXCLUDED.area,
-              prefecture = EXCLUDED.prefecture,
-              venue_name = EXCLUDED.venue_name,
-              address = EXCLUDED.address,
-              url = EXCLUDED.url,
-              description = EXCLUDED.description,
-              announcement_url = EXCLUDED.announcement_url,
-              updated_at = NOW()
+          // Event Master として挿入（UUID自動生成）
+          const masterResult = await client.query(`
+            INSERT INTO event_masters (name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url, is_active, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, true, NOW(), NOW())
+            RETURNING id
           `, [
-            event.id, event.name, event.event_date, event.start_time, event.end_time,
+            event.name, event.event_date, event.start_time, event.end_time,
             event.organizer, event.area, event.prefecture, event.venue_name,
             event.address, event.url, event.description, event.announcement_url
           ]);
+          const masterId = masterResult.rows[0].id;
           importedMasters++;
 
-          // Event として挿入
+          // Event として挿入（master_idも含む）
           await client.query(`
-            INSERT INTO events (id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url, created_at)
+            INSERT INTO events (master_id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
-            ON CONFLICT (id) DO UPDATE SET
-              name = EXCLUDED.name,
-              event_date = EXCLUDED.event_date,
-              start_time = EXCLUDED.start_time,
-              end_time = EXCLUDED.end_time,
-              organizer = EXCLUDED.organizer,
-              area = EXCLUDED.area,
-              prefecture = EXCLUDED.prefecture,
-              venue_name = EXCLUDED.venue_name,
-              address = EXCLUDED.address,
-              url = EXCLUDED.url,
-              description = EXCLUDED.description,
-              announcement_url = EXCLUDED.announcement_url
           `, [
-            event.id, event.name, event.event_date, event.start_time, event.end_time,
+            masterId, event.name, event.event_date, event.start_time, event.end_time,
             event.organizer, event.area, event.prefecture, event.venue_name,
             event.address, event.url, event.description, event.announcement_url
           ]);
           importedEvents++;
 
         } catch (error) {
-          console.error('Event seed error:', event.id, error.message);
+          console.error('Event seed error:', event.name, error.message);
           results.push(`Error seeding ${event.name}: ${error.message}`);
         }
       }
