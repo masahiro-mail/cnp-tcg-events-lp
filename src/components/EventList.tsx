@@ -28,6 +28,9 @@ type TimeFilter = 'future' | 'past'
 export default function EventList({ events, selectedDate, onDateClear }: EventListProps) {
   const [selectedArea, setSelectedArea] = useState('全て')
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('future')
+  
+  // Debug logging
+  console.log('EventList received events:', events.length, events)
 
   // 日付フィルタリング
   const today = new Date()

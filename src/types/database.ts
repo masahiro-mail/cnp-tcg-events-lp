@@ -1,5 +1,6 @@
 export interface Event {
   id: string;
+  master_id?: string; // Optional for backward compatibility
   name: string;
   event_date: string;
   start_time: string;
