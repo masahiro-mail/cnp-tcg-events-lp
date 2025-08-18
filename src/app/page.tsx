@@ -100,7 +100,7 @@ export default function HomePage() {
           </p>
           <div className="flex justify-center">
             <a
-              href="https://twitter.com/messages/compose?recipient_id=zukaishi_wolf"
+              href="https://x.com/Diagram_Wolf"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors duration-200"
@@ -112,7 +112,7 @@ export default function HomePage() {
               >
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
               </svg>
-              XでDMを送る
+              Xで連絡する
             </a>
           </div>
         </div>
