@@ -508,15 +508,28 @@ export const getEvents = async (): Promise<Event[]> => {
   }
   
   try {
+    console.log('🔍 getEvents: PostgreSQL接続開始');
     const client = await pool.connect();
     try {
       const result = await client.query('SELECT * FROM events ORDER BY event_date ASC, start_time ASC');
-      return result.rows;
+      console.log(`📊 getEvents: PostgreSQLから${result.rows.length}件のイベントを取得`);
+      
+      // 日付フォーマットを統一（YYYY-MM-DD形式）
+      const formattedEvents = result.rows.map(event => ({
+        ...event,
+        event_date: event.event_date instanceof Date 
+          ? event.event_date.toISOString().split('T')[0] 
+          : event.event_date.split('T')[0] // 既にISOStringの場合
+      }));
+      
+      console.log('✅ getEvents: 正常にイベントデータを返します');
+      return formattedEvents;
     } finally {
       client.release();
     }
   } catch (error) {
-    console.error('Database connection error:', error);
+    console.error('❌ getEvents: Database connection error:', error);
+    console.log('🔄 getEvents: フォールバックデータを返します');
     return [...mockEvents].sort((a, b) => {
       const dateA = new Date(`${a.event_date} ${a.start_time}`);
       const dateB = new Date(`${b.event_date} ${b.start_time}`);

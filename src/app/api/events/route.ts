@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getEvents } from '@/lib/database'
 
+export const dynamic = 'force-dynamic'
+
 // フォールバック用の8/16イベントデータ
 const fallbackEvents = [
   {
