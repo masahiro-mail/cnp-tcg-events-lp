@@ -11,7 +11,7 @@ const providers = [
     authorization: {
       url: "https://twitter.com/i/oauth2/authorize",
       params: {
-        scope: "users.read tweet.read tweet.write",
+        scope: "users.read tweet.read",
         response_type: "code"
       }
     },
