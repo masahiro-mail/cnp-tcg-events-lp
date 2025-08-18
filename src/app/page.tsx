@@ -17,8 +17,16 @@ export default function HomePage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('/api/events')
+        // Add cache busting and no-cache headers
+        const timestamp = Date.now()
+        const response = await fetch(`/api/events?t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        })
         const data = await response.json()
+        console.log('Fetched events:', data.length, 'events')
         setEvents(data)
       } catch (error) {
         console.error('Error fetching events:', error)
