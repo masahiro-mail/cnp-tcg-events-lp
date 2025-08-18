@@ -1156,12 +1156,31 @@ export const deleteEventMaster = async (eventId: string): Promise<boolean> => {
     return true;
   }
   
-  const client = await pool.connect();
+  if (!pool) {
+    console.error('❌ deleteEventMaster: Database pool not available');
+    throw new Error('Database connection not available');
+  }
+  
   try {
-    const result = await client.query('DELETE FROM event_masters WHERE id = $1', [eventId]);
-    return result.rowCount > 0;
-  } finally {
-    client.release();
+    console.log('🗑️ deleteEventMaster: イベントマスター削除開始', eventId);
+    const client = await pool.connect();
+    try {
+      // 関連するeventsテーブルの削除
+      await client.query('DELETE FROM events WHERE master_id = $1', [eventId]);
+      console.log('✅ 関連イベントを削除しました');
+      
+      // event_mastersテーブルの削除
+      const result = await client.query('DELETE FROM event_masters WHERE id = $1', [eventId]);
+      const success = result.rowCount > 0;
+      
+      console.log(`${success ? '✅' : '❌'} deleteEventMaster: 削除結果 rowCount=${result.rowCount}`);
+      return success;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('❌ deleteEventMaster: Database error:', error);
+    throw error;
   }
 };
 
