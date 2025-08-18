@@ -96,6 +96,20 @@ export async function POST() {
           url: 'https://sapporo-cnp-tcg.jp',
           description: '春の訪れを祝う北海道最大のCNPトレカイベント。トーナメントの他、北海道限定グッズの販売も！',
           announcement_url: 'https://twitter.com/sapporo_cnp_tcg/status/123456793'
+        },
+        {
+          name: 'CNPトレカ オンライン交流戦',
+          event_date: '2025-04-20',
+          start_time: '20:00',
+          end_time: '22:00',
+          organizer: 'CNPトレカ オンライン委員会',
+          area: 'オンライン',
+          prefecture: 'ー',
+          venue_name: 'Discord ボイスチャンネル',
+          address: 'オンライン開催',
+          url: 'https://discord.gg/cnp-tcg',
+          description: '全国のCNPトレカプレイヤーと気軽に対戦できるオンラインイベント。初心者歓迎！デッキ構築のアドバイスもあります。',
+          announcement_url: 'https://twitter.com/cnp_online_tcg/status/123456794'
         }
       ];
 

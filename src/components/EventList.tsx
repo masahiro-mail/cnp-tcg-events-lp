@@ -12,6 +12,7 @@ interface EventListProps {
 
 const AREAS = [
   '全て',
+  'オンライン',
   '北海道',
   '東北',
   '関東',
@@ -179,6 +180,9 @@ export default function EventList({ events, selectedDate, onDateClear }: EventLi
                   <div className="flex items-center space-x-2 mb-1">
                     <span className="text-sm font-medium text-cnp-blue bg-blue-50 px-2 py-1 rounded">
                       {event.area}
+                    </span>
+                    <span className="text-sm font-medium text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                      {event.area === 'オンライン' || event.area === 'その他' ? 'ー' : event.prefecture}
                     </span>
                     <span className="text-sm text-gray-500">
                       {formatDate(event.event_date)} {formatTime(event.start_time)}
