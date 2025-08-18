@@ -24,8 +24,11 @@ const fallbackEvents = [
 export async function GET() {
   try {
     console.log('🔍 本番環境イベント取得開始')
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL)
+    
     const events = await getEvents()
     console.log(`📊 取得したイベント数: ${events.length}`)
+    console.log('取得したイベント:', events.map(e => ({ id: e.id, name: e.name })))
     
     // イベントが空の場合、フォールバックデータを返す
     if (!events || events.length === 0) {
