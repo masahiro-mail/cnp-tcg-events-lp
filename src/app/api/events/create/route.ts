@@ -1,27 +1,28 @@
 import { NextResponse } from 'next/server'
 import { createEvent } from '@/lib/database'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function POST(request: Request) {
   try {
     console.log('🎯 イベント作成API開始')
     
-    // 8/16イベントデータを直接作成
-    const eventData = {
-      name: 'チャンピオンシップ決勝戦PublicView@大阪＆大阪定例交流会#003',
-      event_date: '2025-08-16',
-      start_time: '11:30:00',
-      end_time: '18:00:00',
-      organizer: '図解師★ウルフ',
-      area: '近畿',
-      prefecture: '大阪府',
-      venue_name: 'TIME SHARING TSHG淀屋橋ビル 2F Room.2',
-      address: '大阪市中央区今橋２丁目６−１４ 関西ペイントビル',
-      url: 'https://time-sharing.jp/detail/666798',
-      description: 'モニターで決勝戦の様子を見ながらみんなで盛り上がりたいと思っています🎉\n交流会も兼ねているので、トレカを持参頂きバトルもやりましょう⚔️\n（私は第二弾のプロキシカードを持っていく予定😆）\n入退出自由、短時間でも参加OK🌈\n来れそうな方はリプくださいませ😊',
-      announcement_url: 'https://example.com/event'
+    // ユーザー認証チェック（Xでログインしているかチェック）
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'ログインが必要です' },
+        { status: 401 }
+      )
     }
     
-    console.log('📅 イベントデータ:', eventData.name)
+    // リクエストボディからイベントデータを取得
+    const body = await request.json()
+    const eventData = {
+      ...body,
+      created_by: user.id // 作成者IDを設定
+    }
+    
+    console.log('📅 イベントデータ:', eventData.name, 'by', user.name)
     
     const newEvent = await createEvent(eventData)
     
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       event: newEvent,
-      message: '8/16イベントが作成されました'
+      message: 'イベントが作成されました'
     })
     
   } catch (error) {

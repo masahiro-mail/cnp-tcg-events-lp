@@ -30,6 +30,11 @@ export default function Header() {
             >
               CNPトレカファンサイト
             </a>
+            {session && (
+              <Link href="/mypage" className="text-gray-600 hover:text-cnp-blue transition-colors">
+                マイページ
+              </Link>
+            )}
             {session && session.user?.username === 'Diagram_Wolf' && (
               <Link href="/admin" className="text-gray-600 hover:text-cnp-blue transition-colors">
                 管理者ページ

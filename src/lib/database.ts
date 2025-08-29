@@ -364,10 +364,16 @@ export const initDatabase = async () => {
           url TEXT,
           description TEXT NOT NULL,
           announcement_url TEXT,
+          created_by TEXT NOT NULL,
           is_active BOOLEAN DEFAULT TRUE,
           created_at TIMESTAMPTZ DEFAULT NOW(),
           updated_at TIMESTAMPTZ DEFAULT NOW()
         )
+      `);
+      
+      // Add created_by column to event_masters if it doesn't exist
+      await client.query(`
+        ALTER TABLE event_masters ADD COLUMN IF NOT EXISTS created_by TEXT
       `);
       
       // Create Events table (現在使用中のイベント)
@@ -387,8 +393,14 @@ export const initDatabase = async () => {
           url TEXT,
           description TEXT NOT NULL,
           announcement_url TEXT,
+          created_by TEXT NOT NULL,
           created_at TIMESTAMPTZ DEFAULT NOW()
         )
+      `);
+      
+      // Add created_by column if it doesn't exist
+      await client.query(`
+        ALTER TABLE events ADD COLUMN IF NOT EXISTS created_by TEXT
       `);
       
       // Create Participations table (削除されない参加履歴)
@@ -566,7 +578,6 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       name: data.name,
       event_date: data.event_date,
       start_time: data.start_time,
-      end_time: data.end_time,
       organizer: data.organizer,
       area: data.area,
       prefecture: data.prefecture,
@@ -575,6 +586,7 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       url: data.url,
       description: data.description,
       announcement_url: data.announcement_url || null,
+      created_by: data.created_by,
       created_at: new Date().toISOString()
     };
     
@@ -587,7 +599,6 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       name: data.name,
       event_date: data.event_date,
       start_time: data.start_time,
-      end_time: data.end_time,
       organizer: data.organizer,
       area: data.area,
       prefecture: data.prefecture,
@@ -596,6 +607,7 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
       url: data.url,
       description: data.description,
       announcement_url: data.announcement_url || null,
+      created_by: data.created_by,
       is_active: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -611,16 +623,16 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
     try {
       // 両方のテーブルに同時作成
       const result = await client.query(`
-        INSERT INTO events (name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url)
+        INSERT INTO events (name, event_date, start_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url, created_by)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING *
-      `, [data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
+      `, [data.name, data.event_date, data.start_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url, data.created_by]);
       
       // event_mastersにも同時作成
       await client.query(`
-        INSERT INTO event_masters (id, name, event_date, start_time, end_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      `, [result.rows[0].id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
+        INSERT INTO event_masters (id, name, event_date, start_time, organizer, area, prefecture, venue_name, address, url, description, announcement_url, created_by)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      `, [result.rows[0].id, data.name, data.event_date, data.start_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url, data.created_by]);
       
       return result.rows[0];
     } finally {
@@ -694,17 +706,17 @@ export const updateEvent = async (id: string, data: CreateEventData): Promise<Ev
       // eventsテーブルを更新
       const result = await client.query(`
         UPDATE events 
-        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12, announcement_url = $13
+        SET name = $2, event_date = $3, start_time = $4, organizer = $5, area = $6, prefecture = $7, venue_name = $8, address = $9, url = $10, description = $11, announcement_url = $12, created_by = $13
         WHERE id = $1
         RETURNING *
-      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
+      `, [id, data.name, data.event_date, data.start_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url, data.created_by]);
       
       // 永続化テーブル（event_masters）も同時更新
       await client.query(`
         UPDATE event_masters 
-        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12, announcement_url = $13, updated_at = NOW()
+        SET name = $2, event_date = $3, start_time = $4, organizer = $5, area = $6, prefecture = $7, venue_name = $8, address = $9, url = $10, description = $11, announcement_url = $12, created_by = $13, updated_at = NOW()
         WHERE id = $1
-      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
+      `, [id, data.name, data.event_date, data.start_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url, data.created_by]);
       
       return result.rows[0] || null;
     } finally {

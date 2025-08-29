@@ -13,6 +13,7 @@ export interface Event {
   url?: string;
   description: string;
   announcement_url?: string;
+  created_by: string; // X user ID of the event creator
   created_at: string;
 }
 
@@ -29,7 +30,6 @@ export interface CreateEventData {
   name: string;
   event_date: string;
   start_time: string;
-  end_time?: string;
   organizer: string;
   area: string;
   prefecture: string;
@@ -38,6 +38,7 @@ export interface CreateEventData {
   url?: string;
   description: string;
   announcement_url?: string;
+  created_by: string; // X user ID of the event creator
 }
 
 export interface CreateParticipantData {
@@ -72,6 +73,7 @@ export interface EventMaster {
   url?: string;
   description: string;
   announcement_url?: string;
+  created_by: string; // X user ID of the event creator
   is_active: boolean;
   created_at: string;
   updated_at: string;

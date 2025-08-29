@@ -44,7 +44,6 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
     name: event?.name || '',
     event_date: event?.event_date || '',
     start_time: event?.start_time || '',
-    end_time: event?.end_time || '',
     organizer: event?.organizer || '',
     area: event?.area || AREAS[0],
     prefecture: event?.prefecture || AREA_PREFECTURES[AREAS[0]][0],
@@ -53,6 +52,7 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
     url: event?.url || '',
     description: event?.description || '',
     announcement_url: event?.announcement_url || '',
+    created_by: event?.created_by || ''
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -165,49 +165,18 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
           </div>
 
           <div>
-            <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
-              終了時刻
+            <label htmlFor="announcement_url" className="block text-sm font-medium text-gray-700 mb-1">
+              告知URL（任意）
             </label>
             <input
-              type="time"
-              id="end_time"
-              name="end_time"
-              value={formData.end_time}
+              type="url"
+              id="announcement_url"
+              name="announcement_url"
+              value={formData.announcement_url}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
-              placeholder="任意"
+              placeholder="https://example.com/event"
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
-                終了時刻（任意）
-              </label>
-              <input
-                type="time"
-                id="end_time"
-                name="end_time"
-                value={formData.end_time}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="announcement_url" className="block text-sm font-medium text-gray-700 mb-1">
-                告知URL（任意）
-              </label>
-              <input
-                type="url"
-                id="announcement_url"
-                name="announcement_url"
-                value={formData.announcement_url}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
-                placeholder="https://example.com/event"
-              />
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
