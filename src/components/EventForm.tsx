@@ -44,6 +44,7 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
     name: event?.name || '',
     event_date: event?.event_date || '',
     start_time: event?.start_time || '',
+    end_time: event?.end_time || '',
     organizer: event?.organizer || '',
     area: event?.area || AREAS[0],
     prefecture: event?.prefecture || AREA_PREFECTURES[AREAS[0]][0],
@@ -162,6 +163,21 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
                 required
               />
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
+              終了時刻 *
+            </label>
+            <input
+              type="time"
+              id="end_time"
+              name="end_time"
+              value={formData.end_time}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              required
+            />
           </div>
 
           <div>
