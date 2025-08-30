@@ -4,7 +4,7 @@ export interface Event {
   name: string;
   event_date: string;
   start_time: string;
-  end_time?: string;
+  end_time: string; // Required field
   organizer: string;
   area: string;
   prefecture: string;
@@ -12,7 +12,8 @@ export interface Event {
   address: string;
   url?: string;
   description: string;
-  announcement_url?: string;
+  announcement_url?: string; // Optional field
+  created_by: string; // X user ID of the event creator
   created_at: string;
 }
 
@@ -29,7 +30,7 @@ export interface CreateEventData {
   name: string;
   event_date: string;
   start_time: string;
-  end_time?: string;
+  end_time: string; // Required field
   organizer: string;
   area: string;
   prefecture: string;
@@ -37,7 +38,8 @@ export interface CreateEventData {
   address: string;
   url?: string;
   description: string;
-  announcement_url?: string;
+  announcement_url?: string; // Optional field
+  created_by: string; // X user ID of the event creator
 }
 
 export interface CreateParticipantData {
@@ -63,7 +65,7 @@ export interface EventMaster {
   name: string;
   event_date: string;
   start_time: string;
-  end_time?: string;
+  end_time: string; // Required field
   organizer: string;
   area: string;
   prefecture: string;
@@ -71,7 +73,8 @@ export interface EventMaster {
   address: string;
   url?: string;
   description: string;
-  announcement_url?: string;
+  announcement_url?: string; // Optional field
+  created_by: string; // X user ID of the event creator
   is_active: boolean;
   created_at: string;
   updated_at: string;
