@@ -28,9 +28,12 @@ let mockData = {
   participations: [] as Participation[]
 };
 
+// データの初期化フラグ
+let dataInitialized = false;
+
 // 永続化データの初期化（全環境対応）
-if (typeof window === 'undefined') {
-  // サーバーサイドで永続化データを同期的に初期化
+if (typeof window === 'undefined' && !dataInitialized) {
+  // サーバーサイドで永続化データを同期的に初期化（一度だけ）
   try {
     // 本番環境でも強制的にファイルストレージからデータを読み込み
     console.log('📁 ファイルストレージからデータを読み込み中... (PostgreSQL fallback mode)');
@@ -41,6 +44,8 @@ if (typeof window === 'undefined') {
     mockData.events = persistentData.events;
     mockData.participants = persistentData.participants;
     mockData.participations = persistentData.participations;
+    
+    dataInitialized = true;
     
     // データが空の場合、初期データを作成
     if (mockData.events.length === 0) {
@@ -616,6 +621,19 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
     };
     mockData.event_masters.push(eventMaster);
     
+    // ファイルストレージに保存（永続化）
+    if (databaseUrl?.includes('.json')) {
+      fileStorage.save({
+        users: mockData.users,
+        events: mockData.events,
+        participants: mockData.participants,
+        event_masters: mockData.event_masters,
+        participations: mockData.participations,
+        lastUpdated: new Date().toISOString()
+      });
+      console.log('💾 新しいイベントをファイルストレージに永続化しました');
+    }
+    
     console.log('Mock event added. Total events:', mockData.events.length, ', Event masters:', mockData.event_masters.length);
     return newEvent;
   }
@@ -696,6 +714,19 @@ export const updateEvent = async (id: string, data: CreateEventData): Promise<Ev
         console.log('🔧 イベントマスターも更新完了:', mockData.event_masters[masterIndex].name);
       }
       
+      // ファイルストレージに保存（永続化）
+      if (databaseUrl?.includes('.json')) {
+        fileStorage.save({
+          users: mockData.users,
+          events: mockData.events,
+          participants: mockData.participants,
+          event_masters: mockData.event_masters,
+          participations: mockData.participations,
+          lastUpdated: new Date().toISOString()
+        });
+        console.log('💾 更新されたイベントをファイルストレージに永続化しました');
+      }
+      
       console.log('🔧 イベント更新完了:', mockData.events[eventIndex].name);
       return mockData.events[eventIndex];
     }
@@ -743,10 +774,32 @@ export const updateEvent = async (id: string, data: CreateEventData): Promise<Ev
 export const deleteEvent = async (id: string): Promise<boolean> => {
   if (!pool) {
     console.warn('Database not configured, deleting from mock data');
-    const eventIndex = mockEvents.findIndex(event => event.id === id);
+    const eventIndex = mockData.events.findIndex(event => event.id === id);
+    const masterIndex = mockData.event_masters.findIndex(master => master.id === id);
+    
     if (eventIndex !== -1) {
-      mockEvents.splice(eventIndex, 1);
-      console.log('Mock event deleted. Remaining events:', mockEvents.length);
+      mockData.events.splice(eventIndex, 1);
+      console.log('Mock event deleted. Remaining events:', mockData.events.length);
+    }
+    
+    if (masterIndex !== -1) {
+      mockData.event_masters.splice(masterIndex, 1);
+      console.log('Mock event master deleted. Remaining masters:', mockData.event_masters.length);
+    }
+    
+    if (eventIndex !== -1 || masterIndex !== -1) {
+      // ファイルストレージに保存（永続化）
+      if (databaseUrl?.includes('.json')) {
+        fileStorage.save({
+          users: mockData.users,
+          events: mockData.events,
+          participants: mockData.participants,
+          event_masters: mockData.event_masters,
+          participations: mockData.participations,
+          lastUpdated: new Date().toISOString()
+        });
+        console.log('💾 削除されたイベントをファイルストレージに永続化しました');
+      }
       return true;
     }
     return false;
@@ -762,10 +815,32 @@ export const deleteEvent = async (id: string): Promise<boolean> => {
     }
   } catch (error) {
     console.error('Database connection error:', error);
-    const eventIndex = mockEvents.findIndex(event => event.id === id);
+    const eventIndex = mockData.events.findIndex(event => event.id === id);
+    const masterIndex = mockData.event_masters.findIndex(master => master.id === id);
+    
     if (eventIndex !== -1) {
-      mockEvents.splice(eventIndex, 1);
-      console.log('Mock event deleted after error. Remaining events:', mockEvents.length);
+      mockData.events.splice(eventIndex, 1);
+      console.log('Mock event deleted after error. Remaining events:', mockData.events.length);
+    }
+    
+    if (masterIndex !== -1) {
+      mockData.event_masters.splice(masterIndex, 1);
+      console.log('Mock event master deleted after error. Remaining masters:', mockData.event_masters.length);
+    }
+    
+    if (eventIndex !== -1 || masterIndex !== -1) {
+      // ファイルストレージに保存（永続化）
+      if (databaseUrl?.includes('.json')) {
+        fileStorage.save({
+          users: mockData.users,
+          events: mockData.events,
+          participants: mockData.participants,
+          event_masters: mockData.event_masters,
+          participations: mockData.participations,
+          lastUpdated: new Date().toISOString()
+        });
+        console.log('💾 削除されたイベント（エラー後）をファイルストレージに永続化しました');
+      }
       return true;
     }
     return false;
