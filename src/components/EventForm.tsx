@@ -5,6 +5,7 @@ import { Event, CreateEventData } from '@/types/database'
 
 interface EventFormProps {
   event?: Event
+  initialData?: Event
   onSubmit: (data: CreateEventData) => Promise<{ success: boolean; error?: string }>
   onCancel: () => void
 }
@@ -41,20 +42,21 @@ const getAllPrefectures = () => {
   return Object.values(AREA_PREFECTURES).flat()
 }
 
-export default function EventForm({ event, onSubmit, onCancel }: EventFormProps) {
+export default function EventForm({ event, initialData, onSubmit, onCancel }: EventFormProps) {
+  const eventData = initialData || event
   const [formData, setFormData] = useState<CreateEventData>({
-    name: event?.name || '',
-    event_date: event?.event_date || '',
-    start_time: event?.start_time || '',
-    end_time: event?.end_time || '',
-    organizer: event?.organizer || '',
-    area: event?.area || AREAS[0],
-    prefecture: event?.prefecture || AREA_PREFECTURES[AREAS[0]][0],
-    venue_name: event?.venue_name || '',
-    address: event?.address || '',
-    url: event?.url || '',
-    description: event?.description || '',
-    announcement_url: event?.announcement_url || '',
+    name: eventData?.name || '',
+    event_date: eventData?.event_date || '',
+    start_time: eventData?.start_time || '',
+    end_time: eventData?.end_time || '',
+    organizer: eventData?.organizer || '',
+    area: eventData?.area || AREAS[0],
+    prefecture: eventData?.prefecture || AREA_PREFECTURES[eventData?.area || AREAS[0]][0],
+    venue_name: eventData?.venue_name || '',
+    address: eventData?.address || '',
+    url: eventData?.url || '',
+    description: eventData?.description || '',
+    announcement_url: eventData?.announcement_url || '',
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -100,11 +102,10 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="cnp-card max-w-2xl w-full max-h-screen overflow-y-auto p-8">
+    <div className="cnp-card max-w-2xl w-full max-h-screen overflow-y-auto p-8">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
-            {event ? 'イベントを編集' : '新しいイベントを作成'}
+            {eventData ? 'イベントを編集' : '新しいイベントを作成'}
           </h2>
         </div>
 
@@ -328,7 +329,7 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
                   保存中...
                 </div>
               ) : (
-                event ? '更新' : '作成'
+                eventData ? '更新' : '作成'
               )}
             </button>
             <button
@@ -340,7 +341,6 @@ export default function EventForm({ event, onSubmit, onCancel }: EventFormProps)
             </button>
           </div>
         </form>
-      </div>
     </div>
   )
 }

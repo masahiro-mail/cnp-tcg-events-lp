@@ -78,7 +78,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         setEditingEvent(null)
         return { success: true }
       } else {
-        return { success: false, error: 'イベントの更新に失敗しました' }
+        const errorData = await response.json()
+        return { success: false, error: errorData.error || 'イベントの更新に失敗しました' }
       }
     } catch (error) {
       return { success: false, error: 'ネットワークエラーが発生しました' }
@@ -305,7 +306,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       {editingEvent && (
         <EventForm
-          event={editingEvent}
+          initialData={editingEvent}
           onSubmit={(data) => handleUpdateEvent(editingEvent.id, data)}
           onCancel={() => setEditingEvent(null)}
         />

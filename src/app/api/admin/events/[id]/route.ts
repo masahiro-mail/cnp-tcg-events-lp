@@ -30,7 +30,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    return NextResponse.json(event)
+    return NextResponse.json({ success: true, event: event })
   } catch (error) {
     console.error('Error updating event:', error)
     return NextResponse.json(
