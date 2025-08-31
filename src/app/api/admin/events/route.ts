@@ -45,8 +45,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('POST /api/admin/events - Calling createEvent')
-    const event = await createEvent(data)
+    // 管理者イベントの場合、created_byを管理者IDに設定
+    const eventData = {
+      ...data,
+      created_by: 'admin-Diagram_Wolf' // 管理者が作成したことを示す
+    }
+
+    console.log('POST /api/admin/events - Calling createEvent with data:', eventData)
+    const event = await createEvent(eventData)
     console.log('POST /api/admin/events - Event created:', event)
     return NextResponse.json(event, { status: 201 })
   } catch (error) {
