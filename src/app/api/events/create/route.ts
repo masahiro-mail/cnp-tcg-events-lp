@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createEvent } from '@/lib/database'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     console.log('📅 受信データ:', data)
     
     // 必須フィールドのバリデーション
-    const requiredFields = ['name', 'event_date', 'start_time', 'organizer', 'area', 'prefecture', 'venue_name', 'address']
+    const requiredFields = ['name', 'event_date', 'start_time', 'end_time', 'organizer', 'area', 'prefecture', 'venue_name', 'address']
     for (const field of requiredFields) {
       if (!data[field]) {
         return NextResponse.json({ success: false, error: `${field}は必須項目です` }, { status: 400 })
