@@ -30,6 +30,11 @@ export default function Header() {
             >
               CNPトレカファンサイト
             </a>
+            {session && (
+              <Link href="/mypage" className="text-gray-600 hover:text-cnp-blue transition-colors">
+                マイページ
+              </Link>
+            )}
             {session && session.user?.username === 'Diagram_Wolf' && (
               <Link href="/admin" className="text-gray-600 hover:text-cnp-blue transition-colors">
                 管理者ページ
@@ -38,6 +43,16 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center space-x-4">
+            {/* モバイル用マイページリンク */}
+            {session && (
+              <Link href="/mypage" className="md:hidden text-gray-600 hover:text-cnp-blue transition-colors">
+                <div className="flex flex-col items-center text-xs">
+                  <span>📝</span>
+                  <span>マイページ</span>
+                </div>
+              </Link>
+            )}
+            
             {status === 'loading' ? (
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cnp-blue"></div>
             ) : session ? (
@@ -52,7 +67,7 @@ export default function Header() {
                       className="rounded-full"
                     />
                   )}
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-gray-700 hidden sm:inline">
                     {session.user?.name}
                   </span>
                 </div>
