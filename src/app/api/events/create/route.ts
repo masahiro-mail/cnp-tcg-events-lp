@@ -1,27 +1,42 @@
 import { NextResponse } from 'next/server'
 import { createEvent } from '@/lib/database'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export async function POST(request: Request) {
   try {
     console.log('🎯 イベント作成API開始')
     
-    // 8/16イベントデータを直接作成
-    const eventData = {
-      name: 'チャンピオンシップ決勝戦PublicView@大阪＆大阪定例交流会#003',
-      event_date: '2025-08-16',
-      start_time: '11:30:00',
-      end_time: '18:00:00',
-      organizer: '図解師★ウルフ',
-      area: '近畿',
-      prefecture: '大阪府',
-      venue_name: 'TIME SHARING TSHG淀屋橋ビル 2F Room.2',
-      address: '大阪市中央区今橋２丁目６−１４ 関西ペイントビル',
-      url: 'https://time-sharing.jp/detail/666798',
-      description: 'モニターで決勝戦の様子を見ながらみんなで盛り上がりたいと思っています🎉\n交流会も兼ねているので、トレカを持参頂きバトルもやりましょう⚔️\n（私は第二弾のプロキシカードを持っていく予定😆）\n入退出自由、短時間でも参加OK🌈\n来れそうな方はリプくださいませ😊',
-      announcement_url: 'https://example.com/event'
+    // セッション情報を取得
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: 'ログインが必要です' }, { status: 401 })
     }
     
-    console.log('📅 イベントデータ:', eventData.name)
+    // リクエストボディからデータを取得
+    const data = await request.json()
+    console.log('📅 受信データ:', data)
+    
+    // 必須フィールドのバリデーション
+    const requiredFields = ['name', 'event_date', 'start_time', 'organizer', 'area', 'prefecture', 'venue_name', 'address']
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        return NextResponse.json({ success: false, error: `${field}は必須項目です` }, { status: 400 })
+      }
+    }
+    
+    // エリアのバリデーション
+    if (data.area === '-') {
+      return NextResponse.json({ success: false, error: 'エリアを選択してください' }, { status: 400 })
+    }
+    
+    // created_byフィールドを追加
+    const eventData = {
+      ...data,
+      created_by: session.user.id
+    }
+    
+    console.log('📅 作成するイベントデータ:', eventData.name)
     
     const newEvent = await createEvent(eventData)
     
@@ -29,14 +44,13 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ 
       success: true, 
-      event: newEvent,
-      message: '8/16イベントが作成されました'
+      event: newEvent
     })
     
   } catch (error) {
     console.error('❌ イベント作成エラー:', error)
     return NextResponse.json(
-      { success: false, error: 'イベント作成に失敗しました', details: error.message },
+      { success: false, error: 'イベント作成に失敗しました' },
       { status: 500 }
     )
   }
