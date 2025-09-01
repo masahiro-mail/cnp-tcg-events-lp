@@ -175,36 +175,36 @@ export default function EventList({ events, selectedDate, onDateClear }: EventLi
               key={event.id}
               className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <span className="text-sm font-medium text-cnp-blue bg-blue-50 px-2 py-1 rounded">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="text-xs sm:text-sm font-medium text-cnp-blue bg-blue-50 px-2 py-1 rounded">
                       {event.area}
                     </span>
-                    <span className="text-sm font-medium text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                    <span className="text-xs sm:text-sm font-medium text-gray-600 bg-gray-50 px-2 py-1 rounded">
                       {event.area === 'オンライン' || event.area === 'その他' ? 'ー' : event.prefecture}
                     </span>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-xs sm:text-sm text-gray-500">
                       {formatDate(event.event_date)} {formatTime(event.start_time)}
                     </span>
                   </div>
-                  <h3 className="font-medium text-gray-900 mb-1">
+                  <h3 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">
                     {event.name}
                   </h3>
-                  <div className="text-sm text-gray-600 mb-2 space-y-1">
+                  <div className="text-xs sm:text-sm text-gray-600 mb-2 space-y-1">
                     <p>👤 {event.organizer}</p>
                     <p>📍 {event.venue_name}</p>
-                    {event.url && <p>🔗 <a href={event.url} target="_blank" rel="noopener noreferrer" className="text-cnp-blue hover:underline">{event.url}</a></p>}
+                    {event.url && <p>🔗 <a href={event.url} target="_blank" rel="noopener noreferrer" className="text-cnp-blue hover:underline break-all">{event.url}</a></p>}
                     {event.end_time && <p>⏰ {formatTime(event.start_time)} - {formatTime(event.end_time)}</p>}
                   </div>
-                  <p className="text-sm text-gray-500 line-clamp-2">
+                  <p className="text-xs sm:text-sm text-gray-500 line-clamp-2">
                     {event.description}
                   </p>
                 </div>
-                <div className="ml-4">
+                <div className="sm:ml-4 flex-shrink-0 flex justify-center sm:justify-start">
                   <Link
                     href={`/events/${event.id}`}
-                    className="cnp-button-primary text-sm"
+                    className="cnp-button-primary text-xs px-4 py-2 min-w-[60px] text-center"
                   >
                     詳細
                   </Link>

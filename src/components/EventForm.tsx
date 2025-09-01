@@ -141,7 +141,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
               placeholder="第3回 CNPトレカ東京交流会"
               required
             />
@@ -157,7 +157,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
               name="organizer"
               value={formData.organizer}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
               placeholder="CNP運営事務局"
               required
             />
@@ -174,7 +174,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
                 name="event_date"
                 value={formData.event_date}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
                 required
               />
             </div>
@@ -189,7 +189,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
                 name="start_time"
                 value={formData.start_time}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
                 required
               />
             </div>
@@ -207,7 +207,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
                 name="end_time"
                 value={formData.end_time}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
                 required
               />
             </div>
@@ -222,7 +222,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
                 name="announcement_url"
                 value={formData.announcement_url}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
                 placeholder="https://example.com/event"
               />
             </div>
@@ -238,7 +238,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
                 name="area"
                 value={formData.area}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
                 required
               >
                 {AREAS.map((area) => (
@@ -258,7 +258,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
                 name="prefecture"
                 value={formData.prefecture}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
                 required
               >
                 {AREA_PREFECTURES[formData.area].map((prefecture) => (
@@ -280,7 +280,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
               name="venue_name"
               value={formData.venue_name}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
               placeholder="渋谷ヒカリエ ホールA"
               required
             />
@@ -296,7 +296,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
               name="address"
               value={formData.address}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
               placeholder="東京都渋谷区渋谷2-21-1"
               required
             />
@@ -312,7 +312,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
               name="url"
               value={formData.url}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
               placeholder="https://example.com/event"
             />
           </div>
@@ -327,7 +327,7 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
               value={formData.description}
               onChange={handleChange}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cnp-blue focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
               placeholder="初心者歓迎！CNPトレーディングカードを持参してお越しください。交換やバトルを楽しみましょう。"
             />
           </div>
