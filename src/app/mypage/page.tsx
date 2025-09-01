@@ -78,24 +78,33 @@ export default function MyPage() {
     if (!editingEvent) return { success: false, error: 'エラーが発生しました' }
     
     try {
+      console.log('イベント更新リクエスト:', data)
+      console.log('イベントID:', editingEvent.id)
+      
       const response = await fetch(`/api/events/${editingEvent.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       
-      const result = await response.json()
+      console.log('レスポンスステータス:', response.status)
       
-      if (result.success) {
+      const result = await response.json()
+      console.log('APIレスポンス:', result)
+      
+      if (response.ok && result.success) {
         setEditingEvent(null)
         // イベント一覧を再取得
         window.location.reload()
         return { success: true }
       } else {
-        return { success: false, error: result.error }
+        const errorMessage = result.error || `HTTPエラー: ${response.status} ${response.statusText}`
+        console.error('イベント更新エラー:', errorMessage)
+        return { success: false, error: errorMessage }
       }
     } catch (error) {
-      return { success: false, error: 'イベント更新に失敗しました' }
+      console.error('ネットワークエラー:', error)
+      return { success: false, error: `ネットワークエラー: ${error instanceof Error ? error.message : 'Unknown error'}` }
     }
   }
 

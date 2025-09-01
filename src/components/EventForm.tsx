@@ -66,6 +66,27 @@ export default function EventForm({ event, initialData, onSubmit, onCancel }: Ev
     setIsLoading(true)
     setError('')
 
+    // 必須フィールドのバリデーション
+    const requiredFields: { [key: string]: string } = {
+      name: 'イベント名',
+      event_date: '開催日',
+      start_time: '開始時刻',
+      organizer: '企画者',
+      area: 'エリア',
+      prefecture: '都道府県',
+      venue_name: '会場名',
+      address: '住所'
+    }
+
+    for (const [field, label] of Object.entries(requiredFields)) {
+      const value = formData[field as keyof CreateEventData] as string
+      if (!value || value.trim() === '') {
+        setError(`${label}は必須項目です`)
+        setIsLoading(false)
+        return
+      }
+    }
+
     // エリアのバリデーション
     if (formData.area === '-') {
       setError('エリアを選択してください')

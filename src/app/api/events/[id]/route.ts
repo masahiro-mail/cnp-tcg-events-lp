@@ -45,14 +45,23 @@ export async function PUT(
 
     const data = await request.json()
     
-    const requiredFields = ['name', 'event_date', 'start_time', 'end_time', 'organizer', 'area', 'prefecture', 'venue_name', 'address']
+    // 必須フィールドのバリデーション（end_timeは任意）
+    const requiredFields = ['name', 'event_date', 'start_time', 'organizer', 'area', 'prefecture', 'venue_name', 'address']
     for (const field of requiredFields) {
-      if (!data[field] && data[field] !== '') {
+      if (!data[field] || data[field].trim() === '') {
         return NextResponse.json(
           { error: `${field} is required` },
           { status: 400 }
         )
       }
+    }
+
+    // area が '-' の場合はエラー
+    if (data.area === '-') {
+      return NextResponse.json(
+        { error: 'Please select a valid area' },
+        { status: 400 }
+      )
     }
 
     const updatedEvent = await updateEvent(params.id, data)
