@@ -704,20 +704,20 @@ export const updateEvent = async (id: string, data: CreateEventData): Promise<Ev
   try {
     const client = await pool.connect();
     try {
-      // eventsテーブルを更新
+      // eventsテーブルを更新（created_byは更新しない）
       const result = await client.query(`
         UPDATE events 
-        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12, announcement_url = $13, created_by = $14
+        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12, announcement_url = $13
         WHERE id = $1
         RETURNING *
-      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url, data.created_by]);
+      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
       
-      // 永続化テーブル（event_masters）も同時更新
+      // 永続化テーブル（event_masters）も同時更新（created_byは更新しない）
       await client.query(`
         UPDATE event_masters 
-        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12, announcement_url = $13, created_by = $14, updated_at = NOW()
+        SET name = $2, event_date = $3, start_time = $4, end_time = $5, organizer = $6, area = $7, prefecture = $8, venue_name = $9, address = $10, url = $11, description = $12, announcement_url = $13, updated_at = NOW()
         WHERE id = $1
-      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url, data.created_by]);
+      `, [id, data.name, data.event_date, data.start_time, data.end_time, data.organizer, data.area, data.prefecture, data.venue_name, data.address, data.url, data.description, data.announcement_url]);
       
       return result.rows[0] || null;
     } finally {
