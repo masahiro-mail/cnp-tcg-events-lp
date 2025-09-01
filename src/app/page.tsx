@@ -52,8 +52,8 @@ export default function HomePage() {
           </p>
           <div className="flex justify-center">
             <TwitterPostButton 
-              text="今後のCNPトレカイベントの情報はこちら！みんなでCNPトレカで交流しましょう🔥 #CNP #CNPトレカ #イベント"
-              url="https://cnp-tcg-events-lp-production.up.railway.app"
+              text={`今後のCNPトレカイベントの情報はこちら！🎯\n\nみんなでCNPトレカで交流しましょう🔥\n\n▼イベント情報をチェック\n#CNP #CNPトレカ #イベント`}
+              url="https://event.cnp-tradingcard.com"
               hashtags={[]}
             />
           </div>

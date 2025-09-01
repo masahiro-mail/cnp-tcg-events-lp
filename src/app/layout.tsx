@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import AuthProvider from '@/components/AuthProvider'
+import MobileFooter from '@/components/MobileFooter'
 
 export const metadata: Metadata = {
   title: {
@@ -69,9 +70,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <body className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pb-16 md:pb-0">
         <AuthProvider>
           {children}
+          <MobileFooter />
         </AuthProvider>
       </body>
     </html>
