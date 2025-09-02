@@ -3,7 +3,9 @@ import Header from '@/components/Header'
 import { getEvents } from '@/lib/database'
 
 export default async function EventsPage() {
+  console.log('📅 EventsPage: Loading events list page')
   const events = await getEvents()
+  console.log('📅 EventsPage: Loaded', events.length, 'events')
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)

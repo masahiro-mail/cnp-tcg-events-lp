@@ -81,12 +81,17 @@ export async function generateMetadata({ params }: EventDetailPageProps): Promis
 }
 
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
+  console.log('🔍 EventDetailPage: Received ID:', params.id)
+  
   // UUIDの形式をチェック (例: df4d20e2-bb69-4943-b5e4-d884ef3e9ca5)
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   
   if (!uuidRegex.test(params.id)) {
+    console.log('❌ EventDetailPage: Invalid UUID format for ID:', params.id)
     notFound()
   }
+  
+  console.log('✅ EventDetailPage: Valid UUID format, proceeding...')
   
   const event = await getEventById(params.id)
   
