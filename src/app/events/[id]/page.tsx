@@ -15,6 +15,15 @@ interface EventDetailPageProps {
 }
 
 export async function generateMetadata({ params }: EventDetailPageProps): Promise<Metadata> {
+  // UUIDの形式をチェック
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  
+  if (!uuidRegex.test(params.id)) {
+    return {
+      title: 'イベントが見つかりません',
+    }
+  }
+  
   const event = await getEventById(params.id)
   
   if (!event) {
@@ -72,6 +81,13 @@ export async function generateMetadata({ params }: EventDetailPageProps): Promis
 }
 
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
+  // UUIDの形式をチェック (例: df4d20e2-bb69-4943-b5e4-d884ef3e9ca5)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  
+  if (!uuidRegex.test(params.id)) {
+    notFound()
+  }
+  
   const event = await getEventById(params.id)
   
   if (!event) {

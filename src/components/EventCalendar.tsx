@@ -82,7 +82,7 @@ export default function EventCalendar({ events, selectedDate, onDateSelect }: Ev
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h3 className="text-lg font-semibold px-4">
+        <h3 className="text-base sm:text-lg font-semibold px-2 sm:px-4 text-center flex-1">
           {currentMonth.getFullYear()}年{currentMonth.getMonth() + 1}月
         </h3>
         <button
