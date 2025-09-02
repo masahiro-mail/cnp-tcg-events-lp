@@ -15,10 +15,21 @@ interface EventDetailPageProps {
 }
 
 export async function generateMetadata({ params }: EventDetailPageProps): Promise<Metadata> {
+  console.log('🔍 generateMetadata: Processing ID:', params.id)
+  
+  // 空文字列やundefinedの場合の処理
+  if (!params.id || params.id.trim().length === 0) {
+    console.log('❌ generateMetadata: Empty or undefined ID')
+    return {
+      title: 'イベントが見つかりません',
+    }
+  }
+  
   // UUIDの形式をチェック
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   
-  if (!uuidRegex.test(params.id)) {
+  if (!uuidRegex.test(params.id.trim())) {
+    console.log('❌ generateMetadata: Invalid UUID format for ID:', params.id)
     return {
       title: 'イベントが見つかりません',
     }
@@ -83,10 +94,16 @@ export async function generateMetadata({ params }: EventDetailPageProps): Promis
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
   console.log('🔍 EventDetailPage: Received ID:', params.id)
   
+  // 空文字列やundefinedの場合の処理
+  if (!params.id || params.id.trim().length === 0) {
+    console.log('❌ EventDetailPage: Empty or undefined ID')
+    notFound()
+  }
+  
   // UUIDの形式をチェック (例: df4d20e2-bb69-4943-b5e4-d884ef3e9ca5)
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   
-  if (!uuidRegex.test(params.id)) {
+  if (!uuidRegex.test(params.id.trim())) {
     console.log('❌ EventDetailPage: Invalid UUID format for ID:', params.id)
     notFound()
   }
