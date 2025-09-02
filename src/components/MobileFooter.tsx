@@ -14,14 +14,6 @@ export default function MobileFooter() {
           <span className="text-xs">ホーム</span>
         </Link>
         
-        <Link 
-          href="/events" 
-          className="flex flex-col items-center p-2 text-gray-600 hover:text-cnp-blue transition-colors"
-        >
-          <span className="text-xl mb-1">📅</span>
-          <span className="text-xs">イベント</span>
-        </Link>
-        
         <a 
           href="https://www.cnp-tradingcard.com/" 
           target="_blank" 
@@ -37,7 +29,7 @@ export default function MobileFooter() {
           className="flex flex-col items-center p-2 text-gray-600 hover:text-cnp-blue transition-colors"
         >
           <span className="text-xl mb-1">🔗</span>
-          <span className="text-xs">リンク</span>
+          <span className="text-xs">公式リンク</span>
         </Link>
       </div>
     </footer>
